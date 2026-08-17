@@ -1,8 +1,9 @@
-# PN2D_Level_00_02 项目上下文
+# PN2D_Level_00_04 项目上下文
 
-> 供 AI / 开发者快速了解项目。新对话可用 `@docs/PROJECT_CONTEXT.md` 引用。
+> 供 AI / 开发者快速了解项目。新对话可用 `@docs/PROJECT_CONTEXT.md` 引用。  
+> 待做功能见 `docs/TODO.md`；密码锁见 `docs/CODELOCK.md`。
 
-最后更新：2026-08-14（检视板开闭已测通）
+最后更新：2026-08-17（密码锁触发器已测通；待做见 `docs/TODO.md`）
 
 ---
 
@@ -10,9 +11,9 @@
 
 | 项 | 值 |
 |----|-----|
-| 项目名 | PN2D_Level_00_02 |
+| 项目名 | PN2D_Level_00_04 |
 | 引擎 | Unreal Engine 5.5.4 |
-| 路径 | `D:\PN2D_Level_00_02` |
+| 路径 | `D:\PN2D_Level_00_04` |
 | 类型 | **纯蓝图** 2D 关卡项目（无 `Source/`） |
 | 系列 | ProjectN 2D（PN2D），当前为 Level_00 / Level_00_01 |
 | 原开发路径 | `F:\work\PorjectN_2D\UE\`（已迁移，部分资源未拷贝） |
@@ -294,19 +295,19 @@ IA_Interactive
 |----|------|------|
 | 关灯 | 现有 `BP_Switch` Toggle Tag A（`BedRoom`）；只应打在灯上 | **已有** |
 | 出数字 | `RevealTag`=`PuzzleDigits`；`Set Actor Hidden In Game` 取反；三画默认显、三数字默认 Hidden | **已测通** |
-| 密码锁 | `WBP_CodeLock` + `BP_CodeLock`；对了 Reveal 钥匙 | **下次开工（板未画）** |
+| 密码锁 | `WBP_CodeLock` + `BP_CodeLock`；对了 Reveal 钥匙 | **触发器开板 + 714 解开后不再开 已测通**；Reveal **未做**。详见 `docs/CODELOCK.md` |
 | 刷钥匙 | Tag 显隐，不 Spawn；钥匙默认 Hidden | **待做** |
 | 拾取 / 出门 | `BP_Item_Key` + `BP_Door_KeyTransport` | **已测通** |
 
 实施顺序：① 关灯↔数字 ② 密码锁+Reveal钥匙 ③ 用现成拾取出门串一遍。  
 三关切关 / 存档仍后期；本关不写关卡蓝图，继续摆 Actor。
 
-### 当前优先顺序（2026-08-14）
+### 当前优先顺序（2026-08-15）
 
 1. ~~读表多句 / 变暗 / 检视开闭~~ **已测通**
 2. ~~本关谜题① 关灯↔数字~~ **已测通**
-3. **下次谜题②**：密码锁 → Reveal 钥匙（从画 `WBP_CodeLock` 起）
-4. 串现有拾取出门
+3. ~~密码锁面板 Graph~~ **已测通**（临时 BeginPlay）。改密码 / 换图见 `docs/CODELOCK.md`。下一步：`BP_CodeLock` + Reveal 钥匙，再删 BeginPlay
+4. Reveal 钥匙；串现有拾取出门
 5. 钥匙拾取板增强；多格 Index；开局自言自语（可并行/延后）  
 其后：引导按 I、Toast、环境短提示、ExitPoint；**三关切关 / 存档（后期）** 等
 
@@ -412,11 +413,11 @@ IA_Interactive
 - 删掉触发器/钥匙上残留调试球
 - `WBP_InteractIcon` 若未用可删
 
-### 当前优先顺序（2026-08-14）
+### 当前优先顺序（2026-08-15）
 
 1. ~~读表多句 / 变暗 / 检视开闭~~ **已测通**
 2. ~~本关谜题① 关灯↔数字~~ **已测通**
-3. **下次谜题②**：密码锁 → Reveal 钥匙（从画 `WBP_CodeLock` 起）
+3. ~~密码锁面板 Graph~~ **已测通**。改密码 / 换图见 `docs/CODELOCK.md`。下一步：`BP_CodeLock` + Reveal 钥匙
 4. 串现有拾取出门
 5. 钥匙拾取板增强；多格 Index；开局自言自语（可并行/延后）  
 其后：引导按 I、Toast、环境短提示、ExitPoint 等
@@ -541,6 +542,12 @@ IA_Interactive
 - 踩坑：`ShowPanel` 须把 **Canvas Panel** 设 Visible（只设 self 而 Canvas Collapsed = 无 UI 但仍锁移动）
 - 踩坑：`Img_Item` Draw As 用 **Image**；图须真透明 PNG（棋盘格烤进图会像白框）
 
+### 2026-08-15 午（密码锁 Designer 框架已齐）
+
+- `WBP_CodeLock` Designer **框架已齐**（推倒重画过一次）；Graph / 软暂停 / `BP_CodeLock` **未做**
+- 右栏键盘 123/456/789、`0` 居中、Delete/OK/Cancel 预览已像密码锁
+- 下午从接线开始，不要再改 Hierarchy
+
 ### 2026-08-14（本关谜题流程已定）
 
 - Level_00_01：关灯(Tag A=`BedRoom`) → 数字(Tag B=`PuzzleDigits`) → 密码锁 → Reveal 钥匙 → 拾取 → 出门
@@ -553,15 +560,178 @@ IA_Interactive
 - Forward Shading 双方向光：主光 **ForwardShadingPriority=1**，另一盏 0
 - 红字 unbuilt：Digit 改 Movable 后对其余 Static **Build Lighting Only**
 
-### 下次开工：谜题②密码锁（2026-08-14 收工记）
+### 密码锁（单独文档）
 
-从画板开始，**尚未建** `WBP_CodeLock` / `BP_CodeLock`。
+**维护入口：[`docs/CODELOCK.md`](CODELOCK.md)**（改密码、换图、Graph 接法、下一步触发器）。下面历史收工记保留，新改动写 CODELOCK。
 
-**玩法：** J 开输入板 → 三位 +/- 改数字 → 确认；对了 Reveal 钥匙（不 Spawn）；错了可再开。软暂停抄检视。密码实例可改，默认 **`714`**。
+### 下午开工：谜题②密码锁（2026-08-15 午收工记）
 
-**第 1 步 `WBP_CodeLock`：** `Content/Data/UMG/Puzzle/`；Canvas 默认 Collapsed；`Img_Dim` 全屏变暗；居中 Border；`Txt_Title`；三位 `Txt_D0/D1/D2` + 上/下按钮；`Btn_OK` / `Btn_Cancel`。
+`WBP_CodeLock` Designer **框架已齐**（`Content/Data/UMG/Puzzle/`）。面板 Graph 已于 2026-08-16 夜测通；`BP_CodeLock` 未建。**不要再改 Hierarchy**。
 
-**其后：** 循环 0–9；比对 `CorrectCode`；`BP_CodeLock` 抄触发器 Overlap+J；钥匙 Tag（如 `PuzzleKey`）默认 Hidden，对了 `Set Actor Hidden In Game=false`；再走现有拾取出门。
+### 2026-08-16 凌晨（密码锁 Graph 进行中，未测）
+
+**变量（沿用，勿强改名）：** `InputCode`（已输入）、`DigitCount`=3（上限）、`CorrectCode`=`714`（Instance Editable）
+
+**已接：**
+
+| 项 | 状态 |
+|----|------|
+| `RefreshDigits` | 三格：Len>0/1/2 → Substring Start 0/1/2 → Txt_D0/D1/D2；False 清空同格 |
+| `AppendDigit(Digit: String)` | **Digit 须为函数 Inputs**；Len(InputCode)>=DigitCount 则 Return；否则 Append→SET→RefreshDigits |
+| 数字键 | Event Construct→Bind OnClicked；**OnClicked_Event 白线**→AppendDigit（Digit 填在调用节点上）。至少 7/1/4；Bind 出口白线勿接 Append |
+| Hierarchy | 勿再改 |
+
+**未做 / 已改（见下方 08-16 晚）：** 显示不要走 `RefreshDigits` 函数。
+
+### 2026-08-16 晚（密码锁今晚收工）
+
+工程：`D:\PN2D_Level_00_04`，当前 **`main`**。临时用角色 BeginPlay Create 出板测，**先不建 `BP_CodeLock`**。
+
+**已测通（不要回退）：**
+
+| 项 | 结果 |
+|----|------|
+| BeginPlay Create + ShowPanel | 进关出板 |
+| Cancel OnClicked → ClosePanel | 关板、能走 |
+| DigitCount 默认 3；CorrectCode `714` | 已设 |
+| **Event Graph OnClicked → SET `Txt_D0`** | **格子能出字**（点 7 出 7） |
+| 0–9 / Delete / OK 对错 | **已测通**（2026-08-16 夜） |
+
+**不要用（已证实会空格 / 浪费时间）：**
+
+- 函数 `RefreshDigits` 里 SetText（False 空 SetText 易抄错 Target；函数里改格子不显示）
+- Bind 的 **then** 接 ClosePanel / AppendDigit / DeleteLast（Construct 时就会跑）
+- 数组 Append（Element List）；要用 **Append (String)** A+B
+- 粉线插白口；SET 控件却不接白线执行
+
+**显示规则（今晚只准这一种）：** 改左三格只在 **Event Graph 的 OnClicked** 上，用和 Construct 成功时**同一颗**「SET `Txt_Dx` 的 Text」。先不要调 `RefreshDigits`。
+
+**今晚顺序（改一块、测一块，测不过不要往下）：**
+
+1. **显示** — `Btn_7` OnClicked：Append(String)→SET InputCode→按 Len SET D0/D1/D2。测：7、1、4 三格有字；第 4 下无效。再抄 0–9。
+2. **Delete** — OnClicked 只调 `DeleteLast`，然后同样三格 SET（或 DeleteLast 末尾只 SET 三格，不调 RefreshDigits）。测：删最后一位。
+3. **OK** — OnClicked 只调 `TryConfirm`。对 714 → ClosePanel；错 → ClearEntry + 清三格。测对/错。
+4. **Cancel** 已通，不要改 Bind then。
+5. 通了再 **Save**；`BP_CodeLock` / 删 BeginPlay 临时段 **明天**。
+
+**出问题先测哪：** 格子无字 → 只在该键 OnClicked 硬 SET `Txt_D0`=`7`（Event Graph）；能出则拼字/Len 错，不能出则 Bind/OnClicked。关不掉 → Cancel 的 OnClicked 是否 ClosePanel。进关红字 Game Only → Bind then 误接了 ClosePanel。
+
+**接线：** Bind then 只串下一个 Bind；OnClicked 白线才进逻辑。白接白、粉接粉。改完 **Stop PIE → Compile → Play**，不要 Simulating 时改图。
+
+**踩坑（今晚）：** 勿空白搜 Length（从粉针拖）；Substring 无白线；三个 Substring 勿共用；Append 上限比的是 InputCode 不是 Digit；`>=` 接 DigitCount 不是 Digit；Assign OnClicked 后 Append 接在 **OnClicked_Event 白线**；Digit 必须是函数输入参数才有填框。
+
+**已定玩法（不要改回 +/-）：**
+
+- 外壳：全屏变暗、软暂停、出鼠标 + UI Only
+- 点数字从左往右填三格；满 3 位再点数字无效
+- **删除**：清最后一位；**确认**：比对默认 **`714`**，对了 Reveal 钥匙（Tag，不 Spawn）并关板；错了清空三位、板不关；**返回**：关板不提交
+- 功能键预览文案暂为英文 Delete / OK / Cancel（可以后改中文）；按按钮名字接线
+
+**已定 Hierarchy（2026-08-15 午已核对，无大问题）：**
+
+```
+Canvas Panel
+├── Img_Dim                 Border；铺满；黑 A≈0.6；Draw As = Box/Rounded Box（不要空 Image，会炸 Designer 视口）
+└── Border_Panel            Slot：锚正中；Alignment 0.5,0.5；Size 1100×720；ZOrder 1
+    └── HB_Main
+        ├── SB_Left
+        │   └── VB_Left
+        │       ├── SizeBox_Lock → Img_Lock     320×320 占位，图以后贴
+        │       ├── Spacer                      Y=24
+        │       ├── HB_Digits
+        │       │   ├── SizeBox_D0 → Border_D0 → Txt_D0
+        │       │   ├── SizeBox_D1 → Border_D1 → Txt_D1
+        │       │   └── SizeBox_D2 → Border_D2 → Txt_D2
+        │       └── Txt_Label                   「CODE」；须与 HB_Digits 平级
+        └── SB_Right
+            └── VB_Right
+                ├── HB_Row1 → SB_1/2/3 → Btn_1/2/3 → Text
+                ├── HB_Row2 → SB_4/5/6 → Btn_4/5/6 → Text
+                ├── HB_Row3 → SB_7/8/9 → Btn_7/8/9 → Text
+                ├── HB_Row0 → Pad_L · SB_0 → Btn_0 · Pad_R     （0 对准 8）
+                └── HB_Actions → SB_Delete/OK/Cancel → Btn_* → Text
+```
+
+数字键 Size Box **96×96**；功能键约 **140×56**。Button 在 UE5 **不自带 Text**，须自己拖进去。
+
+**下午接线顺序：（2026-08-15 夜继续）**
+
+1. Canvas 进游戏前改 **Collapsed**；`ShowPanel` 把 Canvas 设 Visible（抄检视）
+2. 角色加 `CodeLock UI`；J 链：Dialogue → Examine → CodeLock → INT OBJ
+3. `ShowPanel` / `ClosePanel`：In Menu + Ignore Move + 显鼠标 + UI Only / 恢复 Game Only
+4. 数字键填位；删除；确认比对；返回关板
+5. 再建 `BP_CodeLock`（抄 `BP_ExamineTrigger`）+ 钥匙 Tag `PuzzleKey`
+
+#### `WBP_CodeLock` Graph 规格（接线用）
+
+**变量**
+
+| 名 | 类型 | 默认 | 说明 |
+|----|------|------|------|
+| `CorrectCode` | String | `714` | Instance Editable |
+| `Entered` | String | 空 | 当前已输入 |
+| `MaxDigits` | Int | 3 | |
+| `RevealKeyTag` | Name | `PuzzleKey` | 对了后 Get All Actors With Tag → Set Actor Hidden In Game = false |
+| `Is Open` | Bool | false | 防重复 |
+
+**Designer**：根 `Canvas Panel` 默认 **Collapsed**（进 PIE 前改好）。
+
+**函数 `RefreshDigits`**：`Txt_D0/D1/D2` 分别显示 `Entered` 第 0/1/2 字符；长度不够则该格 `SetText` 空（或 `_`）。
+
+**函数 `AppendDigit(Digit: String)`**：若 `Len(Entered) >= MaxDigits` Return；否则 `Entered = Entered + Digit` → RefreshDigits。
+
+**函数 `DeleteLast`**：若 Len>0，`Left(Entered, Len-1)` → SET Entered → RefreshDigits。
+
+**函数 `ClearEntry`**：Entered=`""` → RefreshDigits。
+
+**函数 `ShowPanel`**（抄检视 + 拾取鼠标）：
+1. Canvas Panel → Visible；Is Open=true
+2. PC0：`Set Ignore Move Input` true；Cast 角色 → Status=`In Menu`；`HideInteractIcons`
+3. `Set Show Mouse Cursor` true；`Set Input Mode UI Only`（Widget=self，勾 Flush）
+
+**函数 `ClosePanel(bSolved: Bool)`**：
+1. Is Open=false；ClearEntry（可选：解开后也清）
+2. Mouse false；`Set Input Mode Game Only`
+3. Ignore Move false；Status=`Idle`
+4. INT OBJ Valid → 可再 ShowExamine（或 Hide，门锁用 Examine 图标）
+5. SET 角色 `CodeLock UI`=None → Remove from Parent(self)
+
+**函数 `TryConfirm`**：
+- `Entered == CorrectCode` → Get All Actors With Tag(`RevealKeyTag`) → 每个 `Set Actor Hidden In Game(false)` → `ClosePanel(true)`
+- 否则 → ClearEntry（板不关）
+
+**函数 `HandleCodeLock`**：第一版只 `ClosePanel(false)`（J 当返回，与 Cancel 同）
+
+**Event Construct 或按钮绑定**：
+- `Btn_0`…`Btn_9` OnClicked → AppendDigit(`"0"`…`"9"`)
+- `Btn_Delete` → DeleteLast
+- `Btn_OK` → TryConfirm
+- `Btn_Cancel` → ClosePanel(false)
+
+#### `BP_Cha_01`
+
+- 变量 `CodeLock UI`：`WBP_CodeLock` 对象引用
+- `IA_Interactive`：Dialogue Valid→Handle；否则 Examine Valid→HandleExamine；否则 **CodeLock Valid→HandleCodeLock**；否则 INT OBJ→Interactive
+
+#### `BP_CodeLock`（新建，路径 `Interactives/Puzzle/`，抄 `BP_ExamineTrigger`）
+
+- Overlap：Add INT OBJ + ShowExamineIcon / End 清空 + Hide
+- Interactive：CodeLock UI Valid 则 Return；否则 Create `WBP_CodeLock`（Owning=PC0）→ SET 角色 CodeLock UI →（可选 SET CorrectCode/RevealKeyTag）→ Add to Viewport → Delay0 → ShowPanel
+- 场景钥匙 Actor 默认 **Hidden**，Tag=`PuzzleKey`（与 RevealKeyTag 一致）
+
+**Designer 踩坑（已解决，勿重蹈）：**
+
+| 问题 | 处理 |
+|------|------|
+| 空 Image / Image=None 铺满 | Designer 视口白光条、Zoom 卡死；变暗用 **Border** 纯色，或先 Collapsed 再重开 Widget |
+| Border 直接丢进 Horizontal Box | 竖着拉满、画刷糊成条；必须 **Size Box 包住** 再放 Border/Button |
+| 拖到预览上 | 必须拖到 Hierarchy **名字上** |
+| `HB_Digits` 与 `SB_Left` 平级 | 三框跑到锁图右边；须在 `VB_Left` 里、Spacer 下 |
+| `Txt_Label` 进了 `HB_Digits` | CODE 和框挤一行；须与 `HB_Digits` 平级 |
+| `Pad_L` `Pad_R` `SB_0` 顺序错 | 须 `Pad_L` → `SB_0` → `Pad_R` |
+| Details 搜 size 只见 Image Size 32 | **不要改 Image Size**；面板大小改 Slot Size X/Y |
+| Border Draw As = Border | 九宫格厚相框；用 **Rounded Box / Box** |
+| UE5 Button 无自带 Text | 自己往 Button 名字上拖 Text |
 
 ---
 
@@ -650,9 +820,44 @@ https://www.youtube.com/watch?v=3gIjtoZPiRg&t=3631s
 | 检视字在左上、无遮罩 | `Img_Dim` 全屏锚；`Border_Info` 右半屏锚；Text 放进 Border 的 Vertical Box |
 | 检视图周围白框 | `Img_Item` Draw As = **Image**；贴图用透明 PNG，勿把棋盘格画进图 |
 | 改 Icon 恢复后对话框关不掉 | Show/Hide 三路白线须接到 SET Dialogue UI=None + Remove from Parent |
+| 变暗搜不到 WhiteSquareTexture | `Img_Dim` 用 Border 黑 A≈0.6；或 Image Tint A=0.6；勿 A=1 / 空 Image 实心黑 |
+| UMG 画布巨大糊框 | Designer 勿 Zoom -10；Border Draw As 用 Box/Rounded Box，勿 Border；面板大小改 Slot Size 不是 Image Size 32 |
 
 ---
 
 ## 相关旧项目（参考用）
 
 `PN2D_ArtWhiteBox`、`PN2D_BaseMove`、`PN2D_MoveSYS`、`PN2D_Level_00_01_*` 等均在原 `F:` 路径，勿假设本地可用。
+
+微信参考工程（2026-08-15）：`C:\Users\MSI_NB\xwechat_files\...\2026-08\PN2D_01` — 旧交互/UI 参考，见下节「回头小调整」。
+
+---
+
+## 回头小调整（待做，勿打断当前密码锁）
+
+参考 `PN2D_01` 的 UI/交互做法，**以后做小改**，不整包搬：
+
+| 学 | 做法 |
+|----|------|
+| 少 Cast 具体 BP | 交互接口（对齐 `BPI_INT_Check` 或新建 `BPI_Interact`）；角色 J 调接口 |
+| 开板表现 | 可选抄 `UMG_Fade` 淡入淡出 |
+| 调查文案 | 表驱动（已有对话表；检视可类似 `DT_CheckList_Home`） |
+
+**不要照搬：** `SetGamePaused` 硬暂停（继续软暂停）；整换 `UMG_OnCheck` / 整包背包 UMG。
+
+**保持：** Collapsed→Delay0→ShowPanel；J 链 Dialogue→Examine→CodeLock→INT OBJ；关板清空引用。
+
+---
+
+## 04 仓库：墙上密码数字提示（2026-08-15 查）
+
+路径：`D:\PN2D_Level_00_04`。
+
+| 资源 | 状态 |
+|------|------|
+| 贴图 `Interactives/Puzzle/11` `44` `77`（Texture2D） | **在** |
+| `M_Digit_1`、`M_PuzzleDigit_Unlit` | **在** |
+| `M_Digit_4` / `M_Digit_6` / `M_Digit_7` | **曾缺失**（04 只有 1；关卡用 7/1/4 会粉/丢材质）→ **已从 02 拷回** |
+| 关卡 Actor + Tag `PuzzleDigits` | 需在编辑器里确认是否仍摆在卧室墙/地（umap 内难扫到明文） |
+
+材质依赖：`M_Digit_4`→`44`，`M_Digit_7`→`77`，`M_Digit_6`→`11`。拷材质后若仍粉，检查贴图引用与关卡 Element 0 是否仍挂 Unlit。
