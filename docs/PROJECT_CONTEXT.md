@@ -1,9 +1,9 @@
 # PN2D_Level_00_04 项目上下文
 
 > 供 AI / 开发者快速了解项目。新对话可用 `@docs/PROJECT_CONTEXT.md` 引用。  
-> 待做功能见 `docs/TODO.md`；密码锁见 `docs/CODELOCK.md`。
+> 待做功能见 `docs/TODO.md`；密码锁见 `docs/CODELOCK.md`；拾取确认见 `docs/PICKUP.md`。
 
-最后更新：2026-08-17（密码锁触发器已测通；待做见 `docs/TODO.md`）
+最后更新：2026-08-21（拾取键盘光标已测通；待做见 `docs/TODO.md`）
 
 ---
 
@@ -211,13 +211,11 @@ Content/
 
 ```
 IA_Interactive
-  → Is Valid (Dialogue UI)
-       有效 → Handle Interactive          // 跳过全文 / 翻句 / 关闭
-       无效 → Is Valid (Examine UI)
-                有效 → HandleExamine       // 第一版：关检视板
-                无效 → Is Valid (INT OBJ)
-                         有效 → Interactive  // 门 / 拾取 / 对话触发器 / 检视触发器
-                         无效 → （无操作）
+  → Is Valid (Dialogue UI)          有效 → Handle Interactive
+  → Is Valid (Examine UI)           有效 → HandleExamine
+  → Is Valid (CodeLock UI)          有效 → HandleCodeLock
+  → Is Valid (Pickup Confirm UI)    有效 → ConfirmChoice
+  → Is Valid (INT OBJ)              有效 → Interactive
 ```
 
 **已删除**：注释「测试自我对话框」的无 INT OBJ 时 Create 临时段。
@@ -413,14 +411,14 @@ IA_Interactive
 - 删掉触发器/钥匙上残留调试球
 - `WBP_InteractIcon` 若未用可删
 
-### 当前优先顺序（2026-08-15）
+### 当前优先顺序（2026-08-21）
 
 1. ~~读表多句 / 变暗 / 检视开闭~~ **已测通**
 2. ~~本关谜题① 关灯↔数字~~ **已测通**
-3. ~~密码锁面板 Graph~~ **已测通**。改密码 / 换图见 `docs/CODELOCK.md`。下一步：`BP_CodeLock` + Reveal 钥匙
-4. 串现有拾取出门
-5. 钥匙拾取板增强；多格 Index；开局自言自语（可并行/延后）  
-其后：引导按 I、Toast、环境短提示、ExitPoint 等
+3. ~~密码锁面板 + 触发器 + 714 解开后不再开~~ **已测通**（`docs/CODELOCK.md`）
+4. ~~拾取 Yes/No 键盘光标~~ **已测通**（`docs/PICKUP.md`）
+5. **下一步**：Reveal 钥匙 → 捡钥匙出门  
+其后：拾取板增强；多格 Index；开局自言自语；引导按 I、Toast、环境短提示、ExitPoint 等
 
 ---
 
@@ -737,18 +735,20 @@ Canvas Panel
 
 ---
 
-### 拾取确认面板 — 已测通
+### 拾取确认面板 — 键盘光标已测通（2026-08-21）
+
+维护入口：[`docs/PICKUP.md`](PICKUP.md)。
 
 | 资源 | 职责 |
 |------|------|
-| `WBP_PickupConfirm` | 通用 Yes/No + `SetupPrompt`；`SourcePickup` 引用拾取物 |
-| `BP_Item_Key` | Switch：WaitingConfirm 锁 → Create 面板 → SetupPrompt → SourcePickup=self → Viewport → 显鼠标 + UI Only |
+| `WBP_PickupConfirm` | `Yes Selected` + `RefreshCursor` / `SelectYes` / `SelectNo` / `ConfirmChoice`；Yes/No 收成 `DoYes` / `DoNo` |
+| `BP_Item_Key` | WaitingConfirm 锁 → Create → SET 角色 `Pickup Confirm UI` → SetupPrompt → Viewport → **Game Only**、不显鼠标、In Menu |
+| `BP_Cha_01` | `Pickup Confirm UI`；J：ConfirmChoice 在 INT OBJ 前；`IA_movement` 的 **In Menu** 口 A/D 切光标 |
 
-- **已测通**：弹出确认；No 可再弹；Yes 拾取后不再弹；关面板恢复 Game Only
-- Yes：AddItem → Destroy(SourcePickup) → 藏鼠标 → Game Only → Remove from Parent
-- No：藏鼠标 → Game Only → WaitingConfirm=False → Remove from Parent（Is Not Valid 也要关面板）
-- Get Player Controller 用**无 Target**的那个（勿用 Target is Player State）
-- AddItem 用角色函数（Target is BP_Cha_01），勿用 List View 的 Add Item
+- **已测通**：不出鼠标；A/D 选 Yes/No；J 确认；Yes 进背包；No 关板可再捡
+- 开板 **不要** Ignore Move、**不要** UI Only（A/D/J 须进角色）
+- 关板：Idle + 清空 `Pickup Confirm UI` + Game Only（`DoNo` 漏 Idle 会整人不能动）
+- Get Player Controller 用**无 Target**的那个；AddItem 用角色函数（Target is BP_Cha_01）
 
 ### 拾取展示增强 — 已记需求，待做
 

@@ -1,0 +1,45 @@
+---
+description: PN2D_Level_00_04 UE5.5 2D 蓝图项目约定与资源清单
+alwaysApply: true
+---
+
+# PN2D 项目规则
+
+- UE **5.5** 纯蓝图 2D 项目；Paper2D + PaperZD（`Plugins/Marketplace/PaperZD_5.2/`）
+- 详细上下文见 `docs/PROJECT_CONTEXT.md`；密码锁见 `docs/CODELOCK.md`；拾取见 `docs/PICKUP.md`；待做见 `docs/TODO.md`；大任务前先读
+- 用**简体中文**回复
+
+## 已有交互资源
+
+- `BP_Switch`：`Tag`=`BedRoom` 关灯（Toggle Visibility，只应打在灯上）；可选 `RevealTag`=`PuzzleDigits`（**Set Actor Hidden In Game 取反**）
+- 谜题① **已测通**：三画（显）+ 三数字 7/1/4（Hidden）；Digit Unlit、No Collision、Movable
+- `BP_Item_Key` + `WBP_PickupConfirm`：键盘光标 Yes/No **已测通**（A/D + J；不出鼠标；见 `docs/PICKUP.md`）
+- `BP_Cha_01`：`Examine UI`；`CodeLock UI`；`Pickup Confirm UI`；Icon A/B；J：Dialogue → Examine → CodeLock → Pickup Confirm → INT OBJ
+- `WBP_CodeLock` / `BP_CodeLock`（靠近 J 出板；714 解开后不再开）
+- `WBP_DialogueBox` / `BP_DialogueTrigger`；`WBP_ExaminePanel` / `BP_ExamineTrigger`
+- `BPI_Player`、`IA_Interactive`（J）、`IA_Sprint`（K）、`IA_Flashlight`（L）、`WLS_BlackFade`
+
+## 不存在（勿引用）
+
+`BP_Main_Int`、`BP_Main_Int_Child`、`BPI_Check` — 未迁移
+
+## 实现偏好
+
+- 拾取 / 调查 / 对话 / 门：**统一按 J**；对话 Handle；检视 HandleExamine；拾取 ConfirmChoice；否则 INT OBJ
+- 软暂停：对话/锁用 In Menu + Ignore Move；**拾取开板不要 Ignore Move**（否则 A/D 进不了 `IA_movement`）
+- K/L/I 在 In Menu 时 Triggered 与 Completed 都勿改 Status
+- 关灯勿 Toggle 带碰撞的 Mesh；数字 No Collision
+- Get Player Controller Index 0；不直接改 `.uasset`；`Assests` 拼写保留
+
+## 当前进度（2026-08-21）
+
+- 工程：`D:\PN2D_Level_00_04`，分支 **`main`**
+- 密码锁：面板 + 触发器 + 714 解开后不再开锁 **已测通**（`docs/CODELOCK.md`）
+- 拾取确认：A/D 光标 + J **已测通**（`docs/PICKUP.md`）。不要改密码锁 ShowPanel
+- **不要用** `RefreshDigits`；勿再改 Hierarchy
+- **下一步**：Reveal 钥匙（见 `docs/TODO.md`）
+- **延后**：三关切关、存档、每把锁一个密码、改成 4 位、密码锁改键盘
+
+## 关卡
+
+默认：`/Game/Maps/Level_00/Level_00_01/Level_00_01_P`

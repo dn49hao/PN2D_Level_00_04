@@ -4,9 +4,15 @@
 > 已完成的系统细节不写这里：密码锁见 `docs/CODELOCK.md`，总览见 `docs/PROJECT_CONTEXT.md`。  
 > 工程以 **`D:\PN2D_Level_00_04`** 为准。
 
-最后更新：2026-08-17
+最后更新：2026-08-21（拾取键盘光标 **已测通**）
 
 ---
+
+## 今天做
+
+| 优先级 | 项 | 说明 |
+|--------|----|------|
+| **已测通** | **拾取 Yes/No 改键盘光标** | 不出鼠标；A/D 选 Yes/No；J 确认。见 `docs/PICKUP.md`。密码锁 ShowPanel **未改** |
 
 ## 下次做（本关谜题串完）
 
@@ -45,6 +51,7 @@
 | **存档 / 读档** | 和切关一起设计 | SaveGame：背包、旗标、当前关、门已开等 |
 | **一把锁一个密码** | 现在全关一张锁、默认 `714` 即可 | 触发器 Instance Editable `CorrectCode`；Create 后 SET 到 Widget |
 | **改成 4 位** | 现在锁死 3 格 | 加 `Txt_D3`、`DigitCount=4`、所有 SET/Substring 补第四格；不要只改 `DigitCount` |
+| **密码锁改键盘** | 拾取先改；锁继续鼠标 | 方案已写 `CODELOCK.md` 第 16 节：0–9 / Backspace / Enter / Esc；改时去掉 UI Only |
 
 不要把延后项和「下次做」混在一次改里。
 
@@ -55,5 +62,6 @@
 | 文档 | 内容 |
 |------|------|
 | 本文 `docs/TODO.md` | 还要做什么 |
+| `docs/PICKUP.md` | 拾取确认：键盘光标 Yes/No（**已测通**） |
 | `docs/CODELOCK.md` | 密码锁怎么改、怎么接线、踩坑 |
 | `docs/PROJECT_CONTEXT.md` | 全项目背景、已测通系统 |
