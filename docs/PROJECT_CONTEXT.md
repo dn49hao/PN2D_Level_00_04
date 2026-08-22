@@ -3,7 +3,7 @@
 > 供 AI / 开发者快速了解项目。新对话可用 `@docs/PROJECT_CONTEXT.md` 引用。  
 > 待做功能见 `docs/TODO.md`；密码锁见 `docs/CODELOCK.md`；拾取确认见 `docs/PICKUP.md`。
 
-最后更新：2026-08-21（拾取键盘光标已测通；待做见 `docs/TODO.md`）
+最后更新：2026-08-22（本关 714→出现→捡→出门已测通；拾取默认 No；待做见 `docs/TODO.md`）
 
 ---
 
@@ -279,34 +279,31 @@ IA_Interactive
 ### 本关流程 Level_00_01 — **已定**（2026-08-14，分步实施）
 
 ```
-按开关关灯
-  → Tag A（灯）隐藏
-  → Tag B（墙上/地上数字）显示
-玩家记住数字
-  → 密码锁输入
-  → 对了：Reveal 钥匙（场景内先藏着，不要 Spawn）
-  → 拾取（现有 BP_Item_Key + 背包）
+密码锁输入（默认 714，不依赖墙上数字）
+  → 对了：Reveal（场景里先藏着的任意 Tagged Actor，不要 Spawn）
+  → 拾取（若是可捡物，走现有 BP_Item_Key）
   → 出门（现有 BP_Door_KeyTransport）
 ```
 
+关灯出墙上 7/1/4（`BedRoom` / `PuzzleDigits`）**已有实现，2026-08-22 搁置**：先不测、不改开关与数字。以后接回本关再测。
+
 | 段 | 做法 | 状态 |
 |----|------|------|
-| 关灯 | 现有 `BP_Switch` Toggle Tag A（`BedRoom`）；只应打在灯上 | **已有** |
-| 出数字 | `RevealTag`=`PuzzleDigits`；`Set Actor Hidden In Game` 取反；三画默认显、三数字默认 Hidden | **已测通** |
-| 密码锁 | `WBP_CodeLock` + `BP_CodeLock`；对了 Reveal 钥匙 | **触发器开板 + 714 解开后不再开 已测通**；Reveal **未做**。详见 `docs/CODELOCK.md` |
-| 刷钥匙 | Tag 显隐，不 Spawn；钥匙默认 Hidden | **待做** |
+| 关灯出数字 | `BP_Switch` Tag A=`BedRoom`；`RevealTag`=`PuzzleDigits` | **已有，搁置** |
+| 密码锁 | `WBP_CodeLock` + `BP_CodeLock`；对了 Reveal（Tag，勿写死钥匙） | **触发器 + 714 + Reveal 已测通**（`CODELOCK.md` 第 17 节） |
+| 刷出物 | Tag 显隐，不 Spawn；默认 Hidden | **已测通**（`RevealByTag`；For Each 须接 Out Actors） |
 | 拾取 / 出门 | `BP_Item_Key` + `BP_Door_KeyTransport` | **已测通** |
 
-实施顺序：① 关灯↔数字 ② 密码锁+Reveal钥匙 ③ 用现成拾取出门串一遍。  
+当前顺序：密码锁 + Reveal（Tag）→ 现成拾取出门串一遍。  
 三关切关 / 存档仍后期；本关不写关卡蓝图，继续摆 Actor。
 
-### 当前优先顺序（2026-08-15）
+### 当前优先顺序（2026-08-15，历史）
 
 1. ~~读表多句 / 变暗 / 检视开闭~~ **已测通**
 2. ~~本关谜题① 关灯↔数字~~ **已测通**
-3. ~~密码锁面板 Graph~~ **已测通**（临时 BeginPlay）。改密码 / 换图见 `docs/CODELOCK.md`。下一步：`BP_CodeLock` + Reveal 钥匙，再删 BeginPlay
-4. Reveal 钥匙；串现有拾取出门
-5. 钥匙拾取板增强；多格 Index；开局自言自语（可并行/延后）  
+3. ~~密码锁面板 Graph~~ **已测通**
+4. **下一步**：Reveal（`CODELOCK.md` 第 17 节）→ 本关捡钥匙出门
+5. 拾取板增强；多格 Index；开局自言自语（可并行/延后）  
 其后：引导按 I、Toast、环境短提示、ExitPoint；**三关切关 / 存档（后期）** 等
 
 ### 后期：三关线性流程 + 存档（已记需求，暂不实施）
@@ -411,18 +408,30 @@ IA_Interactive
 - 删掉触发器/钥匙上残留调试球
 - `WBP_InteractIcon` 若未用可删
 
-### 当前优先顺序（2026-08-21）
+### 当前优先顺序（2026-08-22）
 
 1. ~~读表多句 / 变暗 / 检视开闭~~ **已测通**
-2. ~~本关谜题① 关灯↔数字~~ **已测通**
+2. 本关谜题① 关灯↔数字 — **已有，搁置**（先不测不改）
 3. ~~密码锁面板 + 触发器 + 714 解开后不再开~~ **已测通**（`docs/CODELOCK.md`）
 4. ~~拾取 Yes/No 键盘光标~~ **已测通**（`docs/PICKUP.md`）
-5. **下一步**：Reveal 钥匙 → 捡钥匙出门  
-其后：拾取板增强；多格 Index；开局自言自语；引导按 I、Toast、环境短提示、ExitPoint 等
+5. ~~Reveal（Tag，任意物）~~ **已测通**（2026-08-22）
+6. ~~隐藏钥匙开局关碰撞、解开再开、捡出门~~ **已测通**
+7. ~~拾取开板默认 No~~ **已测通**（`SelectYes` 的 SET 须保持勾上）
+其后：拾取板增强；多格 Index；开局自言自语；引导按 I、Toast；**解锁直接进背包已记不做**
 
 ---
 
 ## 会话记录
+
+### 2026-08-22
+
+- 关灯出墙上 7/1/4：**搁置**（已有实现不改）
+- Reveal：**已测通**。`RevealByTag` 建在 `BP_CodeLock`（不要建在面板上）。`Get All Actors With Tag` 的 **Out Actors 必须接 For Each 的 Array**
+- 搜 Actor 不要写在 `WBP_CodeLock`（面板 World 会找到 0 个）
+- 隐藏钥匙：开局 `Get Actor Hidden In Game` → 关碰撞；解开 `Set Actor Enable Collision` 勾上。**已测通**
+- 本关：714 → 出现 → 捡 → `BP_Door_KeyTransport` 出门 **已测通**
+- 解锁直接 `AddItem`：方案已记（锁上 `Grant Item ID`，空则不发），**先不做**
+- 拾取默认光标 **No**：`SetupPrompt` → `SelectNo`。踩坑：不要把 `SelectYes` 里的 SET 勾去掉
 
 ### 2026-08-04（至 08-05 凌晨存档）
 
@@ -548,7 +557,7 @@ IA_Interactive
 
 ### 2026-08-14（本关谜题流程已定）
 
-- Level_00_01：关灯(Tag A=`BedRoom`) → 数字(Tag B=`PuzzleDigits`) → 密码锁 → Reveal 钥匙 → 拾取 → 出门
+- Level_00_01：关灯(Tag A=`BedRoom`) → 数字(Tag B=`PuzzleDigits`) → 密码锁 → Reveal → 拾取 → 出门（关灯出数字 **2026-08-22 搁置**）
 - `BP_Switch` 增加可选 `RevealTag`；空则只关灯
 - **已测通**：`PuzzleDigits` + `Set Actor Hidden In Game` 取反
 - **已定表现**：墙上三幅画（默认显）与三个数字（默认 Hidden）**共用** `PuzzleDigits`；关灯画藏、数字出；开灯反过来
@@ -669,7 +678,7 @@ Canvas Panel
 | `CorrectCode` | String | `714` | Instance Editable |
 | `Entered` | String | 空 | 当前已输入 |
 | `MaxDigits` | Int | 3 | |
-| `RevealKeyTag` | Name | `PuzzleKey` | 对了后 Get All Actors With Tag → Set Actor Hidden In Game = false |
+| `Reveal Tag` | Name | `PuzzleReveal` | 对了后 Get All Actors With Tag → Hidden=false。任意 Actor，不必是钥匙 |
 | `Is Open` | Bool | false | 防重复 |
 
 **Designer**：根 `Canvas Panel` 默认 **Collapsed**（进 PIE 前改好）。
@@ -715,7 +724,7 @@ Canvas Panel
 
 - Overlap：Add INT OBJ + ShowExamineIcon / End 清空 + Hide
 - Interactive：CodeLock UI Valid 则 Return；否则 Create `WBP_CodeLock`（Owning=PC0）→ SET 角色 CodeLock UI →（可选 SET CorrectCode/RevealKeyTag）→ Add to Viewport → Delay0 → ShowPanel
-- 场景钥匙 Actor 默认 **Hidden**，Tag=`PuzzleKey`（与 RevealKeyTag 一致）
+- 场景要出现的 Actor 默认 **Hidden**，Tag 与锁的 `Reveal Tag` 一致（本关可先放钥匙）
 
 **Designer 踩坑（已解决，勿重蹈）：**
 

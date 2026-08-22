@@ -12,10 +12,10 @@ alwaysApply: true
 ## 已有交互资源
 
 - `BP_Switch`：`Tag`=`BedRoom` 关灯（Toggle Visibility，只应打在灯上）；可选 `RevealTag`=`PuzzleDigits`（**Set Actor Hidden In Game 取反**）
-- 谜题① **已测通**：三画（显）+ 三数字 7/1/4（Hidden）；Digit Unlit、No Collision、Movable
-- `BP_Item_Key` + `WBP_PickupConfirm`：键盘光标 Yes/No **已测通**（A/D + J；不出鼠标；见 `docs/PICKUP.md`）
+- 谜题① 关灯出墙上 7/1/4：**已有、2026-08-22 搁置**（先不测、不改；Digit Unlit、No Collision、Movable）
+- `BP_Item_Key` + `WBP_PickupConfirm`：键盘光标 Yes/No **已测通**；开板默认 **No**（`SetupPrompt`→`SelectNo`；`SelectYes` 的 SET 须勾上）
 - `BP_Cha_01`：`Examine UI`；`CodeLock UI`；`Pickup Confirm UI`；Icon A/B；J：Dialogue → Examine → CodeLock → Pickup Confirm → INT OBJ
-- `WBP_CodeLock` / `BP_CodeLock`（靠近 J 出板；714 解开后不再开）
+- `WBP_CodeLock` / `BP_CodeLock`（靠近 J 出板；714 解开后不再开；`RevealByTag` 按 Tag 显示）
 - `WBP_DialogueBox` / `BP_DialogueTrigger`；`WBP_ExaminePanel` / `BP_ExamineTrigger`
 - `BPI_Player`、`IA_Interactive`（J）、`IA_Sprint`（K）、`IA_Flashlight`（L）、`WLS_BlackFade`
 
@@ -30,14 +30,16 @@ alwaysApply: true
 - K/L/I 在 In Menu 时 Triggered 与 Completed 都勿改 Status
 - 关灯勿 Toggle 带碰撞的 Mesh；数字 No Collision
 - Get Player Controller Index 0；不直接改 `.uasset`；`Assests` 拼写保留
+- 谜题结果勿写死 Class / 物品名：用 Instance Editable 的 Tag（空 Tag 可跳过）；换物只改关卡摆放
 
-## 当前进度（2026-08-21）
+## 当前进度（2026-08-22）
 
 - 工程：`D:\PN2D_Level_00_04`，分支 **`main`**
-- 密码锁：面板 + 触发器 + 714 解开后不再开锁 **已测通**（`docs/CODELOCK.md`）
-- 拾取确认：A/D 光标 + J **已测通**（`docs/PICKUP.md`）。不要改密码锁 ShowPanel
+- 密码锁：面板 + 触发器 + 714 + Reveal **已测通**（`docs/CODELOCK.md` 第 17 节）
+- 本关串：714 → Tagged 物出现（开碰撞）→ 拾取 → 出门 **已测通**
+- 拾取：A/D + J；开板默认 **No**。不要改密码锁 ShowPanel
 - **不要用** `RefreshDigits`；勿再改 Hierarchy
-- **下一步**：Reveal 钥匙（见 `docs/TODO.md`）
+- **已记不做**：解锁直接 `AddItem`（`Grant Item ID`）；关灯出墙上 7/1/4 **搁置**
 - **延后**：三关切关、存档、每把锁一个密码、改成 4 位、密码锁改键盘
 
 ## 关卡

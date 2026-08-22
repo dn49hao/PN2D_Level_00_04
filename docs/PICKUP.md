@@ -4,7 +4,7 @@
 > 密码锁 **仍用鼠标**；键盘方案预留在 `docs/CODELOCK.md` 第 16 节。  
 > 工程：`D:\PN2D_Level_00_04`
 
-最后更新：2026-08-21（**已测通**）
+最后更新：2026-08-22（已测通；默认光标改为 **No**）
 
 ---
 
@@ -17,7 +17,7 @@
 | **J** | 确认（Yes 拾取 / No 关板，再靠近可再捡） |
 | 鼠标 | **不出**；按钮 OnClicked 留着当备用 |
 
-默认 **Yes**。已在 Yes 再按 A 仍停在 Yes。
+默认 **No**（2026-08-22）。已在 No 再按 D 仍停在 No；A 到 Yes。
 
 ---
 
@@ -40,7 +40,7 @@ J 链：Dialogue → Examine → CodeLock → **Pickup Confirm UI → ConfirmCho
 |------|----------|
 | `BP_Cha_01` | 变量 `Pickup Confirm UI`；J 链插入 ConfirmChoice；`IA_movement` 的 **In Menu** 口切 Yes/No |
 | `BP_Item_Key` | Create 后 SET `Pickup Confirm UI`；开板 Game Only、不显鼠标、In Menu；Cast 角色一次即可 |
-| `WBP_PickupConfirm` | `Yes Selected`（Bool，默认 true）；`RefreshCursor` / `SelectYes` / `SelectNo` / `ConfirmChoice`；Yes/No 逻辑收成 `DoYes` / `DoNo`；`Txt_Yes` / `Txt_No` 改字色 |
+| `WBP_PickupConfirm` | `Yes Selected`（Bool，默认 **false**）；`SetupPrompt` 末尾调 `SelectNo` + `RefreshCursor`。`SelectYes` 的 SET **必须勾 true**；`SelectNo` 的 SET 不勾 |
 
 函数不能直接接到 Event Graph 的 OnClicked，所以 Yes/No 白线收进 `DoYes` / `DoNo`，按钮和 `ConfirmChoice` 都去调。
 
@@ -68,7 +68,7 @@ In Menu
 | 操作 | 预期 |
 |------|------|
 | 靠近钥匙 J | 出板、无鼠标、不能走 |
-| 默认 | Yes 高亮 |
+| 默认 | **No 高亮** |
 | D | No 高亮 |
 | A | 回到 Yes |
 | J 在 Yes | 进背包，钥匙消失，能走，Icon 没 |
@@ -90,12 +90,13 @@ In Menu
 | 字色看起来不变 | `RefreshCursor` 的 True / False **画成同一套颜色**（选谁谁亮） |
 | PIE 突然卡死 | `IA_movement` 上每帧 Print String，测完删掉 |
 | Cast ERROR | Cast 必须进白线；钥匙上 Cast 一次，SET / Hide Icons / In Menu 共用 As BP Cha 01 |
+| 开板停在 No，A/D 切不到 Yes | 改默认时把 **`SelectYes` 里的 SET 勾也去掉了**。SelectYes 必须 SET true；只有变量 Default 和 SelectNo 不勾 |
 
 ---
 
 ## 不要做（下次）
 
-- Reveal 钥匙、换密码锁图
-- 拾取板 3D 旋转模型
+- 换密码锁图、拾取板 3D 旋转模型
 - 改 Yes/No 按钮 Hierarchy 名字
 - 密码锁改键盘
+- 解锁直接进背包（已记 `TODO.md`，先不做）

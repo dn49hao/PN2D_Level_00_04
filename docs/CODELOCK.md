@@ -4,7 +4,7 @@
 > 还没做的功能总表见 `docs/TODO.md`。总览见 `docs/PROJECT_CONTEXT.md`。  
 > 工程以 **`D:\PN2D_Level_00_04`** 为准（分支 `main`）。
 
-最后更新：2026-08-17（触发器 + 714 解开后不再开锁 **已测通**）
+最后更新：2026-08-22（Reveal **已测通**；本关捡出门已串；解锁进包先不做）
 
 ---
 
@@ -21,7 +21,7 @@
 | `BP_CodeLock` 触发器（靠近按 J 出板） | **已测通**（抄检视；见第 14、15 节） |
 | 714 OK 后当场再 J | **已测通**：不出锁、不出调查 Icon |
 | Cancel 后再 J | **已测通**：还能开锁 |
-| 解开后 Reveal 钥匙（Tag，不 Spawn） | **未做** |
+| 解开后 Reveal（Tag，任意 Actor，不 Spawn） | **已测通**（见第 17 节） |
 | 三关切关 / 存档 | **后期** |
 
 默认地图：`/Game/Maps/Level_00/Level_00_01/Level_00_01_P`
@@ -34,8 +34,8 @@
 |------|------|
 | Widget | `Content/Data/UMG/Puzzle/WBP_CodeLock` |
 | 触发器 Actor | `Content/Data/Interactives/Puzzle/BP_CodeLock`（由 `BP_ExamineTrigger` 复制） |
-| 墙上数字（谜题①） | 关卡里 Tag `PuzzleDigits`；默认 Hidden；关灯后显示 **7 / 1 / 4** |
-| 钥匙（解开后出现） | 尚未接；计划场景内默认 Hidden，Tag `PuzzleKey` |
+| 墙上数字（谜题①） | **搁置**。Tag `PuzzleDigits` 已有实现先不动；测锁直接输 `714` |
+| 解开后出现的物 | 场景里先摆好，默认 Hidden；Tag 与锁的 `Reveal Tag` 相同。本关可先放 `BP_Item_Key` |
 
 贴图建议放到：
 
@@ -51,10 +51,10 @@
 - **Delete**：清最后一位
 - **OK**：比对 `CorrectCode`（默认 **`714`**）。对了关板；错了清空三位、板不关
 - **Cancel**：关板不提交，恢复走路
-- 解开后（尚未接）：Get All Actors With Tag → `Set Actor Hidden In Game(false)`，**不 Spawn**
+- 解开后：Get All Actors With Tag（锁上的 `Reveal Tag`）→ 每个 `Set Actor Hidden In Game(false)`，**不 Spawn、不 Cast 成钥匙**
 - 功能键预览文案暂为英文 Delete / OK / Cancel，可改显示文字，**按钮控件名不要改**
 
-与谜题①对齐：墙上数字是 7、1、4，所以默认密码是 `714`。改密码时墙上数字也要一起改。
+默认密码仍是 `714`。关灯出墙上数字已搁置，测锁不用先关灯。以后接回谜题①时再让墙上数字与 `CorrectCode` 对齐。
 
 ---
 
@@ -165,7 +165,7 @@ TryConfirm
 ```
 
 - `==` 必须从 **字符串粉针**拖出 **Equal (String)**，不要空白搜整数 `==`
-- 今晚 **不要**在 True 里 Get All Actors With Tag（Reveal 钥匙下一步再加）
+- `TryConfirm` True 里加 Reveal：见第 17 节（下一步）
 
 ### `ClosePanel`（已测通）
 
@@ -208,8 +208,7 @@ Compile → Save → Play：进关不应再出锁，能走路。
 1. 打开 `WBP_CodeLock` → Graph → 变量 **`Correct Code`**
 2. Details → **Default Value** 改成新密码（String，不要空格）
 3. 位数必须等于 **`Digit Count`**（现在是 3）
-4. 墙上 `PuzzleDigits` 三张图改成对应数字，玩家才能对照
-5. Compile → Stop PIE → Play，用新密码测 OK / 错码清空
+4. Compile → Stop PIE → Play，用新密码测 OK / 错码清空。墙上数字已搁置，先不用改 `PuzzleDigits`
 
 现在还是 BeginPlay 临时出板，改 **Widget 默认值** 即可。
 
@@ -277,13 +276,13 @@ Compile → Save → Play：进关不应再出锁，能走路。
 
 ## 11. 尚未做
 
-已移到 **`docs/TODO.md`**。密码锁相关下次只做 **Reveal 钥匙**；三关切关、存档、每把锁一个密码、改成 4 位均 **延后**。
+已移到 **`docs/TODO.md`**。密码锁相关下次只做 **Reveal（第 17 节）**；三关切关、存档、每把锁一个密码、改成 4 位均 **延后**。
 
 ---
 
 ## 14. `BP_CodeLock` 触发器（抄检视）
 
-就是 `BP_ExamineTrigger` 那套：靠近进 INT OBJ，按 **J** Create 面板。开板后用鼠标点 Cancel / OK 关；密码锁是 UI Only，开着时 J 通常进不来（和检视用 J 关不同）。
+就是 `BP_ExamineTrigger` 那套：靠近进 INT OBJ，按 **J** Create 面板。开板后 **仍用鼠标** 点数字 / OK / Cancel（UI Only）。以后若与拾取统一成键盘，见第 16 节预留，**现在不要改 ShowPanel**。
 
 ### 前提
 
@@ -380,9 +379,9 @@ Compile → Save → Play。
 | 714 + OK | 关板、能走；**当场再 J 不出锁、不出 Icon** |
 | 空地按 J | 不出锁 |
 
-### 不要做（今晚）
+### 不要做（接触发器那晚）
 
-- Reveal 钥匙
+- Reveal（见第 17 节，下一步再做）
 - 改 Hierarchy
 - 把 BeginPlay 临时 Create 接回去
 
@@ -513,3 +512,91 @@ Solved Branch：**True 空着**，**False** 才 Add INT OBJ。
 6. Cancel：关板、能走，不提交
 
 换图额外看：锁图没拉伸碎、按钮字还在、变暗没有白光。
+
+---
+
+## 16. 预留：不用鼠标（键盘输入）— **先不要做**
+
+2026-08-21：拾取改成 A/D + J；密码锁 **继续鼠标**。以后若要统一，按本节改，不要现在动 `ShowPanel`。
+
+不要在 12 颗键上走光标。数字键直接输入。按钮 OnClicked 留着当备用。
+
+| 键 | 作用 |
+|----|------|
+| **0–9** | 和点对应按钮一样 |
+| **Backspace** | 同 Delete |
+| **Enter** | 同 OK → `TryConfirm` |
+| **Esc** | 同 Cancel → `ClosePanel` |
+| **J** | 仍 `HandleCodeLock` → `ClosePanel`（返回）。不要改成 OK |
+
+以后改 `ShowPanel` 时：不出鼠标；**去掉 UI Only**，改 Game and UI / Game Only；`Set Keyboard Focus`（self）；Widget **Is Focusable**。
+
+`Event On Key Down`：Key Equal `One`…`Zero` / `Backspace` / `Enter` / `Escape`，分别走现有数字 OnClicked / DeleteLast / TryConfirm / ClosePanel。不要调 `RefreshDigits`。不要空白搜字符串 `"1"`。
+
+---
+
+## 17. Reveal（任意物，按 Tag）— **已测通**（2026-08-22）
+
+锁解开后：把场景里已摆好、带指定 Tag 的 Actor 显示出来。不 Spawn、不 Cast 成钥匙。换物只改关卡 Tag / Hidden。
+
+搜 Actor 必须在 **`BP_CodeLock`** 上做。不要写在 `WBP_CodeLock` 里（面板当 World 会找到 0 个；也不要在面板上建 `RevealByTag`）。
+
+### 正式接法
+
+| 在哪 | 做什么 |
+|------|--------|
+| `BP_CodeLock` 变量 | `Reveal Tag`（Name，默认 `PuzzleReveal`，Instance Editable）。空 = 解开后不显示 |
+| `BP_CodeLock` 函数 `RevealByTag` | 见下。**不要加函数 Inputs**；读 self 的变量 `Reveal Tag`（不要读 `Tag`，那是另一颗，关卡里常为 None） |
+| `WBP_CodeLock` → `TryConfirm` | HideInteractIcons 之后：从 Cast **As BP Code Lock 蓝针**拖出 `RevealByTag` → ClosePanel |
+| 关卡 | 要出现的 Actor：Hidden in Game + **Actor Tags**（不是 Component Tags）与锁实例 `Reveal Tag` 相同 |
+| `BP_Item_Key` BeginPlay | `Get Actor Hidden In Game` → True 则 `Set Actor Enable Collision` 不勾。解开后由 `RevealByTag` 再打开 |
+
+```
+RevealByTag（BP_CodeLock，无输入）
+  → Branch（Reveal Tag != None）
+       False → Return
+       True  → Get All Actors With Tag（Tag = self 的 Reveal Tag）
+             → For Each
+                  Array = Out Actors     ← 必须接，否则 Length 有数、循环不跑
+                  Loop Body → Set Actor Hidden In Game（New Hidden = false）
+                           → Set Actor Enable Collision（勾上，Target = Array Element）
+```
+
+`TryConfirm` True 已有 SET `Solved` / 关锁碰撞 / 清 INT OBJ / HideInteractIcons，不要拆。Cast Failed → ClosePanel。
+
+临时 Print 测完删掉。
+
+### 以后：解开直接进背包（2026-08-22 已记，先不做）
+
+锁上加 `Grant Item ID`（Name，Instance Editable，空=不发）。`RevealByTag` 的 For Each **Completed** 后：ID 非空则 Cast 角色 → `AddItem`。不要和场景里同一件可捡物一起用（会进两次）。出门仍看背包 `HasItem`。
+
+### 场景里
+
+1. 摆要出现的 Actor（Cube / 钥匙 / 柜子，须是独立 Actor）
+2. **Hidden in Game** 勾上
+3. Actor **Tags** 加 `PuzzleReveal`
+4. 锁实例 `Reveal Tag`=`PuzzleReveal`
+
+### 踩坑
+
+| 现象 | 原因 |
+|------|------|
+| 714 关板、物不出现；Print Length=1 但没名字 | For Each 的 **Array 没接 Out Actors** |
+| 面板 Compile：self 不是 BP_CodeLock | `Get Reveal Tag` / `RevealByTag` 建在了 `WBP_CodeLock` 上 |
+| 函数直接 Return | 读成了变量 `Tag`（None），或函数入口另有一颗空的 `Reveal Tag` 输入 |
+| 柜子不出现 | 不是独立 Actor，或 Tag 加在 Component Tags |
+
+### 验收
+
+| 操作 | 预期 |
+|------|------|
+| 开局 | 物看不见（走近出 Icon 可忽略） |
+| 714 + OK | 物出现；板关、能走 |
+| 当场再 J | 不出锁 |
+
+### 不要做
+
+- Spawn、Cast 成具体物品类、为「不是钥匙」另写解锁
+- 改 Hierarchy / ShowPanel / 键盘；不要改关灯 / `PuzzleDigits`（搁置）
+- 不要在 Reveal 里关碰撞 / Delay；不要在面板上建 `RevealByTag` |
+
