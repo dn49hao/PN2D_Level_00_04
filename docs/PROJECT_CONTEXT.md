@@ -3,7 +3,7 @@
 > 供 AI / 开发者快速了解项目。新对话可用 `@docs/PROJECT_CONTEXT.md` 引用。  
 > 待做功能见 `docs/TODO.md`；密码锁见 `docs/CODELOCK.md`；拾取确认见 `docs/PICKUP.md`。
 
-最后更新：2026-08-22（本关 714→出现→捡→出门已测通；拾取默认 No；待做见 `docs/TODO.md`）
+最后更新：2026-08-24（本关已测通；下一步拾取板展示；背包 8 格规格见 `docs/TODO.md`）
 
 ---
 
@@ -155,6 +155,7 @@ Content/
   - 函数 `HasItem(ItemID: 命名) → 布尔`：Contains（已对齐）
   - 函数 `AddItem(ItemID: 命名)`：Add 进集合/数组（执行白线必须经过 Add）
 - **HUD**：`WBP_InventoryHUD` 上屏 + Refresh；**按 I 显隐已测通**（默认隐藏）；多格 Index / 图标仍待做
+- **后续规格（2026-08-24，先不做）**：固定 8 格；从左填第一个空格；满 8 格拒捡；中间清空不前挤、下次捡回填该格。栏内菜单：**调查 / 使用 / Combine / 丢弃**（丢弃只留口）。调查开新窗口，**与拾取板同一套图/模型展示**。全文见 `docs/TODO.md`「后续：背包栏」
 - **已定（2026-08-10）**：进游戏 **默认隐藏** 背包栏；按 **I** 显隐；引导提示打开（另做）；下滑动画后期；拾取文字提示另开 UI
 - **按 I 显隐 — 已测通（2026-08-11）**
   - `WBP_InventoryHUD`：`ShowInventoryHUD` / `HideInventoryHUD` / `ToggleInventoryHUD`；变量 `Inventory Visible`；`Set Visibility` Target=`self`（Show=Visible+true，Hide=Collapsed+false）
@@ -172,7 +173,7 @@ Content/
 - 注意：格子 Is Variable 勾在 **Text** 上不是 Size Box；Designer 默认 Text 应留空（勿当编号）
 - `BP_Item_Key` 里 AddItem 后的 Print 为临时调试，可删
 - **任务队列（2026-08-09 起）**：见下方「当前优先顺序」；背包多格/图标排在对话与 Icon 之后
-- 延后：ExitPoint、选中框、Examine；耗钥确认可复用 PickupConfirm；环境短提示 `WBP_ScreenPrompt` 与对话框分开
+- 延后：ExitPoint、选中框；栏内调查/使用/Combine/丢弃见 `TODO.md`；耗钥确认可复用 PickupConfirm；环境短提示 `WBP_ScreenPrompt` 与对话框分开
 
 ### 3. 对话 / 打字机信息框 — **打字机 MVP 已测通**（2026-08-09～10）
 
@@ -417,7 +418,7 @@ IA_Interactive
 5. ~~Reveal（Tag，任意物）~~ **已测通**（2026-08-22）
 6. ~~隐藏钥匙开局关碰撞、解开再开、捡出门~~ **已测通**
 7. ~~拾取开板默认 No~~ **已测通**（`SelectYes` 的 SET 须保持勾上）
-其后：拾取板增强；多格 Index；开局自言自语；引导按 I、Toast；**解锁直接进背包已记不做**
+其后：拾取板展示（第一版）→ 背包 8 格（规格见 `TODO.md`）→ 开局自言自语；引导按 I、Toast；**解锁直接进背包已记不做**
 
 ---
 
@@ -759,7 +760,9 @@ Canvas Panel
 - 关板：Idle + 清空 `Pickup Confirm UI` + Game Only（`DoNo` 漏 Idle 会整人不能动）
 - Get Player Controller 用**无 Target**的那个；AddItem 用角色函数（Target is BP_Cha_01）
 
-### 拾取展示增强 — 已记需求，待做
+### 拾取展示增强 — **第一版进行中**（2026-08-24）
+
+维护入口：[`docs/PICKUP.md`](PICKUP.md)「展示增强」。静图 + 描述；`Display Mesh` 先挂在钥匙上不接线。栏内调查以后复用同一套。
 
 参考 Asleep 拾取界面（用户参考视频约 **1:00:31**）：  
 https://www.youtube.com/watch?v=3gIjtoZPiRg&t=3631s  
