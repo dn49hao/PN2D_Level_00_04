@@ -4,7 +4,7 @@
 > 密码锁 **仍用鼠标**；键盘方案预留在 `docs/CODELOCK.md` 第 16 节。  
 > 工程：`D:\PN2D_Level_00_04`
 
-最后更新：2026-08-24（键盘光标已测通；展示第一版进行中：静图 + 描述）
+最后更新：2026-09-04（键盘光标已测通；展示第一版静图 + 描述 **已测通**）
 
 ---
 
@@ -94,11 +94,13 @@ In Menu
 
 ---
 
-## 展示增强（第一版）— **进行中**
+## 展示增强（第一版）— **已测通**（2026-09-04）
 
 参考 Asleep：上图/模型 → 中描述 → 下「Take it?」+ Yes/No。
 
 第一版只接 **静图 + 描述**。`Display Mesh` 变量先挂上、不接线。自动旋转、Scene Capture 以后再说。
+
+**已落地：** `Img_Item` 在 Vertical Box 顶上的 Size Box（360×360 Override）里；`Txt_Desc` 在其下；Yes/No 未改。`SetupPrompt` 增加输入 `In Desc` / `In Image`（函数 Inputs，不要加成 Widget 变量）。钥匙实例填 `Item Description` + `Display Image`。新道具再摆一份 `BP_Item_Key`，只改 Details。
 
 展示数据挂在拾取物上。以后栏内「调查」开新窗口时复用同一套（同一份图/描述/Mesh、同一块 `Img_Item`），不要另做检视 UI；只是没有 Take it? / Yes/No。见 `TODO.md`「后续：背包栏」。
 
@@ -119,11 +121,11 @@ In Menu
 
 打开 `Content/Data/UMG/HUD/WBP_PickupConfirm` → **Designer**。
 
-**不要改名、不要删：** `Prompt Text`、`Txt_Yes`、`Txt_No`、`Btn_Yes`、`Btn_No`。Yes/No **不要拖进别的父节点**。
+**不要改名、不要删：** 现有名字以编辑器为准（`PromptText`、`BtnYes` / `BtnNo`、`Txt_Yes` / `Txt_No`）。Yes/No **不要拖进别的父节点**。
 
 若上次已经加过 `Img_Item` / `Txt_Desc`，跳到步骤 2。
 
-Palette 拖到 Hierarchy，放在提示字和 Yes/No **上面**（同级 Canvas 即可）：
+Palette 拖到 Hierarchy 里 **Border → Vertical Box 最顶**（图和描述不要单独扔在 Canvas 上）：
 
 | 名字 | 类型 | Details |
 |------|------|---------|
@@ -159,7 +161,8 @@ SetText（Target = Txt_Desc，In Text = In Desc）
 ```
 
 搜 **Set Brush from Texture**，不要 Set Brush from Asset。  
-`Is Valid` 的对象接 **`In Image`**，不是 self。
+`Is Valid` 的对象、以及 Set Brush 的 Texture，必须接函数**入口节点**上的 `In Image`，不是 My Blueprint 里同名变量，也不是 self。  
+`Set Brush from Texture` 的 Target 必须是 **`Img_Item`**，不是 self。
 
 Compile。若 `BP_Item_Key` 上 SetupPrompt 变红，去步骤 3 补针。
 
@@ -206,6 +209,10 @@ Stop PIE → Play：靠近钥匙 **J**。
 | 图周围白框 | `Img_Item` Draw As 用了 Box/Border；或 PNG 把棋盘格烤进图了 |
 | 开板无图无字 | 改了 Class 默认，没改**关卡实例**；或 SetupPrompt 新针没接到钥匙变量 |
 | SetupPrompt 编译红 | 加了输入但钥匙那边没把 `In Desc` / `In Image` 接上 |
+| 钥匙调用上没有 `In Desc` / `In Image` | 两针加成了函数 **Outputs**；应加在 **Inputs**。改完 Compile 面板，钥匙上 Refresh Node |
+| Designer 有图、游戏没有 | `Is Valid` 接了 Widget **变量** `In Image`（空），没接函数入口针。False 会 Collapsed，把默认图也藏掉 |
+| 有描述没图、板子很扁 | `Img_Item` 没包进 Size Box，或 Size Box 的 Width/Height **Override 没勾**；`Set Brush` Target 误接 self |
+| 黑底铺满、内容挤中间 | `Border` 锚点拉伸了。Anchors 正中、Alignment 0.5、勾 Size To Content；`Img_Dim` 仍铺满。Designer Zoom 不要停在 -6 |
 | A/D 又没了 | 误改了 Ignore Move / UI Only / `SelectYes` 的 SET 勾 |
 | 图铺满全屏 | 锚点铺满且 Offset 全 0；改成居中 + 固定 Size |
 
@@ -217,4 +224,4 @@ Stop PIE → Play：靠近钥匙 **J**。
 - 改 Yes/No 按钮 Hierarchy 名字；加 `Sel_Yes` / `Sel_No`（光标灰框以后再说）
 - 密码锁改键盘 / ShowPanel
 - 解锁直接进背包
-- 背包 8 格 / 栏内调查（调查以后复用这套 `Img_Item`）
+- 栏内调查（以后复用这套 `Img_Item`；背包数据层见 `INVENTORY.md`）

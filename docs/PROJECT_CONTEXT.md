@@ -3,7 +3,7 @@
 > 供 AI / 开发者快速了解项目。新对话可用 `@docs/PROJECT_CONTEXT.md` 引用。  
 > 待做功能见 `docs/TODO.md`；密码锁见 `docs/CODELOCK.md`；拾取确认见 `docs/PICKUP.md`。
 
-最后更新：2026-08-24（本关已测通；下一步拾取板展示；背包 8 格规格见 `docs/TODO.md`）
+最后更新：2026-09-05（背包 8 格 + 满包 + 格子出图已测通；下一步栏内操作）
 
 ---
 
@@ -418,11 +418,29 @@ IA_Interactive
 5. ~~Reveal（Tag，任意物）~~ **已测通**（2026-08-22）
 6. ~~隐藏钥匙开局关碰撞、解开再开、捡出门~~ **已测通**
 7. ~~拾取开板默认 No~~ **已测通**（`SelectYes` 的 SET 须保持勾上）
-其后：拾取板展示（第一版）→ 背包 8 格（规格见 `TODO.md`）→ 开局自言自语；引导按 I、Toast；**解锁直接进背包已记不做**
+8. ~~拾取板展示（第一版：静图 + 描述）~~ **已测通**（2026-09-04）
+其后：背包 8 格数据层（`docs/INVENTORY.md`）→ HUD 8 格 → 栏内菜单；开局自言自语；引导按 I、Toast；**解锁直接进背包已记不做**
 
 ---
 
 ## 会话记录
+
+### 2026-09-05
+
+- 背包 8 格数据层 + HUD Text 刷新 **已测通**
+- `InventoryItems` Resize 8；`AddItem` 第一空格；`RemoveItem` 清格不缩短
+- `WBP_InventoryHUD`：`Slot Texts` Construct 装控件 `1`～`8`（不要 `SizeBox_SP` 的 `Text`）；`RefreshInventory` 只留 For Loop 0–7 一套；旧 For Each + `Inventory Text` 已删
+- 测通：按 I 八格空；捡钥匙状态格右边第一格 `Item_A`；出门耗钥后消失
+- **满包拒捡已测通**：`DoYes` 看 `b Added`；失败不 Destroy；`SayBagFull` 对话
+- **格子出图已测通**：`Inventory Images`；`DoYes` 传 `Display Image`；Refresh `Make Slate Brush` 64×64 + `Set Brush`（Target is Image）。新物品只改实例图
+- 下次：栏内操作
+
+### 2026-09-04
+
+- 拾取板展示第一版 **已测通**：`WBP_PickupConfirm` 上图 + `Txt_Desc` + 原 Yes/No；钥匙实例 `Display Image` / `Item Description`
+- 新道具：再摆 `BP_Item_Key` 实例，只改 Details，不必每件新建变量
+- 踩坑：`In Desc` / `In Image` 须为函数 **Inputs**（不要 Outputs）；`Is Valid` / Set Brush 须接**入口针**不是 Widget 变量；Set Brush Target = `Img_Item`；`Img_Item` 须在 Size Box 内且 Override 360；`Border` Size To Content 居中，`Img_Dim` 仍铺满
+- `Display Mesh` 仍不接线。下次：背包 8 格
 
 ### 2026-08-22
 
@@ -760,7 +778,7 @@ Canvas Panel
 - 关板：Idle + 清空 `Pickup Confirm UI` + Game Only（`DoNo` 漏 Idle 会整人不能动）
 - Get Player Controller 用**无 Target**的那个；AddItem 用角色函数（Target is BP_Cha_01）
 
-### 拾取展示增强 — **第一版进行中**（2026-08-24）
+### 拾取展示增强 — **第一版已测通**（2026-09-04）
 
 维护入口：[`docs/PICKUP.md`](PICKUP.md)「展示增强」。静图 + 描述；`Display Mesh` 先挂在钥匙上不接线。栏内调查以后复用同一套。
 

@@ -4,7 +4,7 @@
 > 已完成的系统细节不写这里：密码锁见 `docs/CODELOCK.md`，总览见 `docs/PROJECT_CONTEXT.md`。  
 > 工程以 **`D:\PN2D_Level_00_04`** 为准。
 
-最后更新：2026-08-24（今天：拾取板展示第一版；背包 8 格规格已记，后续再做）
+最后更新：2026-09-05（8 格 + 满包 + 格子出图已测通；下次栏内操作）
 
 ---
 
@@ -12,10 +12,10 @@
 
 | 优先级 | 项 | 说明 |
 |--------|----|------|
-| **已测通** | **Reveal（按 Tag）** | `BP_CodeLock.RevealByTag`；For Each 的 Array 须接 Out Actors。见 `CODELOCK.md` 第 17 节 |
-| **已测通** | **隐藏物开局关碰撞** | `BP_Item_Key` BeginPlay：`Get Actor Hidden In Game` 则关碰撞；解开再开 |
-| **已测通** | **本关捡钥匙出门** | 714 → 钥匙出现 → 拾取 → `BP_Door_KeyTransport` |
-| **已测通** | **拾取默认光标在 No** | `SetupPrompt` 调 `SelectNo`。`SelectYes` 里 SET **必须勾上**。见 `PICKUP.md` |
+| **已测通** | **背包 8 格数据层 + Text 刷新** | Resize 8；`AddItem` 填空格；`RemoveItem` 清格不前挤；`Slot Texts` 刷 0–7。见 `INVENTORY.md` |
+| **已测通** | **满包拒捡** | `DoYes` 看 `b Added`；失败不 Destroy；`SayBagFull` 出对话。新物品走同一套拾取板即可 |
+| **已测通** | **格子出图** | `AddItem` 写入 `Inventory Images`；Refresh `Make Slate Brush` 64×64 + `Set Brush`。新物品只改实例 `Display Image` |
+| **已确认** | BeginPlay 临时出板 | 开局不弹锁 |
 
 ## 下次做
 
@@ -23,8 +23,7 @@
 
 | 优先级 | 项 | 说明 |
 |--------|----|------|
-| **1 进行中** | **拾取板展示（第一版）** | 上图 + 描述 + Take it? + Yes/No。静图 + 描述；Mesh 只挂变量。步骤见 `PICKUP.md` |
-| 确认 | BeginPlay 临时出板 | 开局不应再弹锁 |
+| **1** | **栏内操作** | 选中格菜单：调查 / 使用 / Combine / 丢弃（丢弃只留口）。调查复用拾取板图/描述 |
 
 关灯出数字仍搁置。解锁直接进背包已记，先不做。
 
@@ -39,7 +38,7 @@
 | 改默认密码 | Widget 变量 `CorrectCode`。墙上数字已搁置，先只改锁 |
 | **解锁直接进背包** | 锁上 `Grant Item ID`（Name，空则不发）；解开 `AddItem` 到角色。不要和场景捡同一件，否则会进两次。2026-08-22 已记，先不做 |
 | 拾取板增强 | 上模型可转、描述、Take it? 参考 Asleep；排在本关串通之后 |
-| **背包 8 格 + 栏内操作** | 规格见下方「后续：背包栏」。按 I 显隐已通。排在拾取板第一版之后，先不做 |
+| **背包 8 格 + 栏内操作** | 已升到「下次做」。规格见下方「后续：背包栏」 |
 | 开局自言自语 | BeginPlay 或区域自动对话 |
 | 引导按 I、Toast、环境短提示 `WBP_ScreenPrompt` | 延后 |
 | `Img_Dim` | 铺满 + 黑 A≈0.6；若左上角还有白条再改 Offset 全 0 |
@@ -80,7 +79,7 @@
 
 `RemoveItem`：清掉对应那一格，不要把数组缩短。开门耗钥走同一套空格回填。
 
-满包提示可先写在拾取板上，不必先做 `WBP_ScreenPrompt`。格子第一版可用 Text 显示 `Item_A`；图标以后换。
+满包拒捡 **已测通**（对话 `SayBagFull`，不必 `WBP_ScreenPrompt`）。格子第一版可用 Text 显示 `Item_A`；图标以后换。
 
 ### 栏内操作（选中格后）
 
@@ -101,7 +100,8 @@
 
 | 文档 | 内容 |
 |------|------|
-| 本文 `docs/TODO.md` | 还要做什么；背包 8 格规格见「后续：背包栏」 |
+| 本文 `docs/TODO.md` | 还要做什么；背包规格见「后续：背包栏」 |
+| `docs/INVENTORY.md` | 背包 8 格：数据层步骤、不要改什么、怎么测 |
 | `docs/PICKUP.md` | 拾取确认：键盘光标 Yes/No（**已测通**） |
 | `docs/CODELOCK.md` | 密码锁；第 17 节 Reveal（Tag，任意 Actor） |
 | `docs/PROJECT_CONTEXT.md` | 全项目背景、已测通系统 |
