@@ -133,7 +133,7 @@ Content/
 | Hierarchy | Canvas（默认 Collapsed）→ `Img_Dim`（全屏锚）→ `Img_Item` → `Border_Info`（右半屏；内 Vertical Box：Title/Body/Page/BackHint） |
 | `Img_Dim` | 全屏；`WhiteSquareTexture`；Tint 黑 A≈0.6；须在 Hierarchy 最底 |
 | `Img_Item` | 左中锚、Size 约 720×820；Angle -6 仅观感；**Draw As = Image**（Box/Border 会出白框）；图用透明 PNG |
-| `Border_Info` | Anchors Min (0.5,0) Max (1,1)；字在其 Vertical Box 内，勿直接挂 Canvas |
+| `Border_Info` | Anchors Min (0.5,0) Max (1,1)；字在其 Vertical Box 内。**2026-09-10**：白底已关（Brush A=0）；字改白。正文折行/栏宽 **以后再调**（`Txt_Body` Slot 用 Fill + Padding；中文须 Auto Wrap + Allow Per Character Wrapping。文案在关卡实例 `ExamineBody`，不要改 Widget 占位字） |
 | `SetupExamine(InTitle, InBody, InImage)` | SetText；`InImage` 蓝针=Texture2D，Is Valid 才 Set Brush |
 | `ShowPanel` | **Canvas Panel Visible**（只设 self 而 Canvas 仍 Collapsed 则看不见）；PC0 Ignore Move **勾上**；In Menu + HideInteractIcons |
 | `CloseExamine` | Ignore Move **不勾**；Idle；INT OBJ Valid→ShowExamine；两路→SET Examine UI=None→Remove from Parent(self) |
@@ -433,7 +433,7 @@ IA_Interactive
 - **开栏全屏变暗已测通**：Canvas 下加 `Img_Dim`（Border，铺满，黑 A≈0.6）；底栏 Border ZOrder 1。不 SET In Menu
 - **开栏屏蔽 J 已测通**：`IA_Interactive` 最前 Is Valid HUD → Inventory Visible；True 空着。关栏后调查/拾取恢复
 - **已记、先不做**：开局锁背包。I 要等引导触发后才开；只锁开栏不锁捡东西。现在测背包 I 仍随时可用
-- **下一步**：栏内菜单（调查 / 使用 / Combine / 丢弃只留口；接在 J 的 True 口）
+- **下一步**：栏内菜单壳（`INVENTORY.md` 第三块：HUD 九个函数 + 角色改 TryInventoryNav / J True 口）。调查出图第四块再做
 
 ### 2026-09-09～10
 

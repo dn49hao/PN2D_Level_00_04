@@ -42,7 +42,7 @@ alwaysApply: true
 - **选格已测通（2026-09-10）**：开栏人不能走；关栏能走；拾取 Yes/No 仍对；A/D 换格。Show 末尾 Latched **不勾**；`IA_movement` Completed 解锁（Target = HUD）。不 SET In Menu
 - **开栏全屏变暗已测通**：`Img_Dim` Border，黑 A≈0.6，底栏 ZOrder 1
 - **开栏屏蔽 J 已测通**：`IA_Interactive` 最前 Branch Inventory Visible；True 空着（以后菜单）。关栏后 J 恢复
-- **下一步**：栏内菜单（调查 / 使用 / Combine / 丢弃只留口）
+- **下一步**：栏内菜单壳（函数见 `docs/INVENTORY.md` 第三块；调查出图再下一块）
 - **不要用** `RefreshDigits`；勿再改密码锁 Hierarchy
 - **已记、先不做**：开局锁背包（I 要等引导触发后才开）；解锁直接 `AddItem`；关灯出墙上 7/1/4 **搁置**
 - **延后**：三关切关、存档、每把锁一个密码、改成 4 位、密码锁改键盘
