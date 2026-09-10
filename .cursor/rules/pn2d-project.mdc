@@ -13,7 +13,7 @@ alwaysApply: true
 
 - `BP_Switch`：`Tag`=`BedRoom` 关灯（Toggle Visibility，只应打在灯上）；可选 `RevealTag`=`PuzzleDigits`（**Set Actor Hidden In Game 取反**）
 - 谜题① 关灯出墙上 7/1/4：**已有、2026-08-22 搁置**（先不测、不改；Digit Unlit、No Collision、Movable）
-- `BP_Item_Key` + `WBP_PickupConfirm`：键盘光标 Yes/No **已测通**；开板默认 **No**（`SetupPrompt`→`SelectNo`；`SelectYes` 的 SET 须勾上）
+- `BP_Item_Key` + `WBP_PickupConfirm`：键盘光标 Yes/No **已测通**；开板默认 **No**；**静图 + 描述已测通**（`SetupPrompt` 入口针 `In Desc` / `In Image`，不要用同名 Widget 变量）
 - `BP_Cha_01`：`Examine UI`；`CodeLock UI`；`Pickup Confirm UI`；Icon A/B；J：Dialogue → Examine → CodeLock → Pickup Confirm → INT OBJ
 - `WBP_CodeLock` / `BP_CodeLock`（靠近 J 出板；714 解开后不再开；`RevealByTag` 按 Tag 显示）
 - `WBP_DialogueBox` / `BP_DialogueTrigger`；`WBP_ExaminePanel` / `BP_ExamineTrigger`
@@ -32,14 +32,19 @@ alwaysApply: true
 - Get Player Controller Index 0；不直接改 `.uasset`；`Assests` 拼写保留
 - 谜题结果勿写死 Class / 物品名：用 Instance Editable 的 Tag（空 Tag 可跳过）；换物只改关卡摆放
 
-## 当前进度（2026-08-22）
+## 当前进度（2026-09-10）
 
 - 工程：`D:\PN2D_Level_00_04`，分支 **`main`**
 - 密码锁：面板 + 触发器 + 714 + Reveal **已测通**（`docs/CODELOCK.md` 第 17 节）
 - 本关串：714 → Tagged 物出现（开碰撞）→ 拾取 → 出门 **已测通**
-- 拾取：A/D + J；开板默认 **No**。不要改密码锁 ShowPanel
-- **不要用** `RefreshDigits`；勿再改 Hierarchy
-- **已记不做**：解锁直接 `AddItem`（`Grant Item ID`）；关灯出墙上 7/1/4 **搁置**
+- 拾取：A/D + J；开板默认 **No**；**上图 + 描述已测通**。不要改密码锁 ShowPanel；**`IA_movement` 的 In Menu 口（SelectYes/No）不要拆**
+- **背包 8 格 + 满包拒捡 + 格子出图已测通**（`docs/INVENTORY.md`）
+- **选格已测通（2026-09-10）**：开栏人不能走；关栏能走；拾取 Yes/No 仍对；A/D 换格。Show 末尾 Latched **不勾**；`IA_movement` Completed 解锁（Target = HUD）。不 SET In Menu
+- **开栏全屏变暗已测通**：`Img_Dim` Border，黑 A≈0.6，底栏 ZOrder 1
+- **开栏屏蔽 J 已测通**：`IA_Interactive` 最前 Branch Inventory Visible；True 空着（以后菜单）。关栏后 J 恢复
+- **下一步**：栏内菜单（调查 / 使用 / Combine / 丢弃只留口）
+- **不要用** `RefreshDigits`；勿再改密码锁 Hierarchy
+- **已记、先不做**：开局锁背包（I 要等引导触发后才开）；解锁直接 `AddItem`；关灯出墙上 7/1/4 **搁置**
 - **延后**：三关切关、存档、每把锁一个密码、改成 4 位、密码锁改键盘
 
 ## 关卡

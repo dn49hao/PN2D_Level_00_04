@@ -3,7 +3,7 @@
 > 供 AI / 开发者快速了解项目。新对话可用 `@docs/PROJECT_CONTEXT.md` 引用。  
 > 待做功能见 `docs/TODO.md`；密码锁见 `docs/CODELOCK.md`；拾取确认见 `docs/PICKUP.md`。
 
-最后更新：2026-09-05（背包 8 格 + 满包 + 格子出图已测通；下一步栏内操作）
+最后更新：2026-09-10（选格 + 开栏变暗 + 屏蔽 J 已测通；下次栏内菜单）
 
 ---
 
@@ -155,8 +155,9 @@ Content/
   - 函数 `HasItem(ItemID: 命名) → 布尔`：Contains（已对齐）
   - 函数 `AddItem(ItemID: 命名)`：Add 进集合/数组（执行白线必须经过 Add）
 - **HUD**：`WBP_InventoryHUD` 上屏 + Refresh；**按 I 显隐已测通**（默认隐藏）；多格 Index / 图标仍待做
-- **后续规格（2026-08-24，先不做）**：固定 8 格；从左填第一个空格；满 8 格拒捡；中间清空不前挤、下次捡回填该格。栏内菜单：**调查 / 使用 / Combine / 丢弃**（丢弃只留口）。调查开新窗口，**与拾取板同一套图/模型展示**。全文见 `docs/TODO.md`「后续：背包栏」
-- **已定（2026-08-10）**：进游戏 **默认隐藏** 背包栏；按 **I** 显隐；引导提示打开（另做）；下滑动画后期；拾取文字提示另开 UI
+- **8 格数据 + 出图已测通**（2026-09-05）。**选格已测通**（2026-09-10）：开栏 A/D 高亮，看钥匙变大变小；不 SET In Menu；不改拾取 In Menu 口。步骤见 `docs/INVENTORY.md`「第二块：选格」。栏内菜单（调查 / 使用 / Combine / 丢弃）下一块再做。全文见 `docs/TODO.md`「后续：背包栏」
+- **已定（2026-08-10）**：进游戏 **默认隐藏** 背包栏；按 **I** 显隐；下滑动画后期；拾取文字提示另开 UI
+- **已定（2026-09-10，先不做）**：**开局不能按 I 开栏**；场景触发引导之后才允许。**第一次打开背包**后再提示 A/D 左右换格。只锁开栏，捡东西进数组照旧。选中格当前是 **放大（约 1.5）+ 其它格 Opacity 0.55**，Target 为格子 Border，空格也能看出框。
 - **按 I 显隐 — 已测通（2026-08-11）**
   - `WBP_InventoryHUD`：`ShowInventoryHUD` / `HideInventoryHUD` / `ToggleInventoryHUD`；变量 `Inventory Visible`；`Set Visibility` Target=`self`（Show=Visible+true，Hide=Collapsed+false）
   - 输入：`IA_Inventory`（键 **I**）→ `IM_Player_Movement`；角色用 **Started**（勿用 Triggered，连按会连 Toggle）
@@ -425,13 +426,32 @@ IA_Interactive
 
 ## 会话记录
 
+### 2026-09-10
+
+- **换格外观已测通**：开栏 A/D 看钥匙变大/缩回。根因是 Latched 开栏锁死、Triggered 松手不再跑。修：Show 末尾 Latched **不勾**；`IA_movement` Completed 上 SET Latched false（Target = Inventory HUD，不要 self）。Completed 原有 Set Relative Location 用 Sequence 保留
+- **选中格明暗已测通**：`RefreshSlotCursor` 对 Overlay 的 **Get Parent（Border）** 做 Scale / Opacity（不要 self）。选中 1.5 / 1.0，其它 1.0 / 0.55。空格能看出框
+- **开栏全屏变暗已测通**：Canvas 下加 `Img_Dim`（Border，铺满，黑 A≈0.6）；底栏 Border ZOrder 1。不 SET In Menu
+- **开栏屏蔽 J 已测通**：`IA_Interactive` 最前 Is Valid HUD → Inventory Visible；True 空着。关栏后调查/拾取恢复
+- **已记、先不做**：开局锁背包。I 要等引导触发后才开；只锁开栏不锁捡东西。现在测背包 I 仍随时可用
+- **下一步**：栏内菜单（调查 / 使用 / Combine / 丢弃只留口；接在 J 的 True 口）
+
+### 2026-09-09～10
+
+- **栏内选格** 接线：HUD `Slot Frames` / `RefreshSlotCursor` / `MoveSlotCursor` / `HandleInventoryNav`；角色 `TryInventoryNav`；`IA_movement` 在 Switch 前 Branch In Menu
+- **已测通**：开栏人不能走；关栏能走；拾取板 A/D 仍是 Yes/No（In Menu 口没拆）；A/D 换格看钥匙变化
+- 不 SET In Menu。菜单 / 调查还没做
+
+### 2026-09-09
+
+- 开始 **栏内选格**：开栏 A/D 高亮 0–7；不 SET In Menu；步骤见 `docs/INVENTORY.md`「第二块：选格」
+
 ### 2026-09-05
 
 - 背包 8 格数据层 + HUD Text 刷新 **已测通**
 - `InventoryItems` Resize 8；`AddItem` 第一空格；`RemoveItem` 清格不缩短
 - `WBP_InventoryHUD`：`Slot Texts` Construct 装控件 `1`～`8`（不要 `SizeBox_SP` 的 `Text`）；`RefreshInventory` 只留 For Loop 0–7 一套；旧 For Each + `Inventory Text` 已删
 - 测通：按 I 八格空；捡钥匙状态格右边第一格 `Item_A`；出门耗钥后消失
-- **满包拒捡已测通**：`DoYes` 看 `b Added`；失败不 Destroy；`SayBagFull` 对话
+- **满包拒捡已测通**：失败不 Destroy；`SayBagFull` 对话。关对话先认钥匙 `ShowPickupIcon`，勿 Valid 就 ShowExamine（会叠「拾取/调查」）
 - **格子出图已测通**：`Inventory Images`；`DoYes` 传 `Display Image`；Refresh `Make Slate Brush` 64×64 + `Set Brush`（Target is Image）。新物品只改实例图
 - 下次：栏内操作
 
