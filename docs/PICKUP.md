@@ -102,7 +102,7 @@ In Menu
 
 **已落地：** `Img_Item` 在 Vertical Box 顶上的 Size Box（360×360 Override）里；`Txt_Desc` 在其下；Yes/No 未改。`SetupPrompt` 增加输入 `In Desc` / `In Image`（函数 Inputs，不要加成 Widget 变量）。钥匙实例填 `Item Description` + `Display Image`。新道具再摆一份 `BP_Item_Key`，只改 Details。
 
-展示数据挂在拾取物上。以后栏内「调查」开新窗口时复用同一套（同一份图/描述/Mesh、同一块 `Img_Item`），不要另做检视 UI；只是没有 Take it? / Yes/No。见 `TODO.md`「后续：背包栏」。
+展示数据挂在拾取物上。栏内「调查」走 **`WBP_ExaminePanel`**（左图右文、J 返回）。拾取板用 `Item Description`；调查用 `Examine Title` / `Examine Body`。不要开本板做调查、不要 Yes/No。见 `INVENTORY.md` 第四块。
 
 **不要改：** Yes/No 控件名、A/D、默认 No、`SelectYes` 的 SET 勾、密码锁 `ShowPanel`、`DoYes`/`DoNo`。
 

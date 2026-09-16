@@ -4,7 +4,7 @@
 > 按 I 显隐 **已测通**，改多格时不要拆。  
 > 工程：`D:\PN2D_Level_00_04`
 
-最后更新：2026-09-10（选格已测通；第三块栏内菜单：函数清单已写，Graph 未接）
+最后更新：2026-09-15（手电改为拾取进左边圆格，不进 8 方格）
 
 ---
 
@@ -14,12 +14,13 @@
 |----|------|
 | **I** | 显隐底栏。`IA_Inventory` 用 **Started**。In Menu 时忽略 |
 | 开局 | 默认 **Hide**（Collapsed） |
-| **A / D**（仅底栏可见时） | 高亮左/右一格；到头停住不循环。关栏后 A/D 仍是走路 |
+| **A / D**（仅底栏可见时） | 高亮左/右一格；第 8 格再 D 回第 1 格，第 1 格再 A 回第 8 格。关栏后 A/D 仍是走路 |
 | 开栏时 **J** | 有物：开栏内菜单 / 菜单里确认。空格：无菜单。关栏后 J 才是场景交互 |
-| 菜单打开时 **A / D** | 上下一项（调查 → 使用 → Combine → 丢弃）；不再换格 |
-| **I** | 关栏时顺便关菜单 |
+| 菜单打开时 **A / D** | 上下一项（Examine → Use → Combine → Discard）；不再换格 |
+| **I** | 关栏时顺便关菜单 / 调查窗 |
+| 调查开着时 **J** | 关调查窗，回到底栏；不要 Yes/No |
 
-调查 / 使用 / Combine / 丢弃：**菜单壳见第三块；调查出图下一块。**
+栏内调查正文来自钥匙 **`Examine Body`**（不是 `Item Description`）。`Item Description` 只给拾取 Yes/No 板。标题走 **`Examine Title`** → `SetupExamine` 的 `In Title`。
 
 ---
 
@@ -35,7 +36,7 @@
 | `HasItem` | 仍按 `ItemID` **Contains**。开门不要改成按格子号 |
 | `RemoveItem` | 找到该 ID 的那一格，写成空 Name；**不要** Remove / 缩短数组 |
 
-例：`[钥匙][电池][纸条]` → 用掉电池 → `[钥匙][空][纸条]` → 再捡手电 → `[钥匙][手电][纸条]`。
+例：`[钥匙][电池][纸条]` → 用掉电池 → `[钥匙][空][纸条]` → 再捡 → `[钥匙][新物][纸条]`。手电不进这 8 格。
 
 格子有图显示图（64×64），没图才显示 `Item_A`。  
 满包：**已测通**。`AddItem` 失败 → 关板（不要走 `DoNo` 的 ShowPickupIcon）→ `HideInteractIcons` → `SayBagFull`。`CloseDialogue` 须先 Cast `BP_Item_Key` → `ShowPickupIcon`，再 Cast 对话/检视 → `ShowExamineIcon`（互斥）。否则关对话会错成「调查」或和「拾取」叠字。
@@ -54,6 +55,7 @@
 - 栏内菜单 Graph 未写前不要改 J 的 True 口；第三块只往 True 口接 `HandleInventoryJ`
 - **不要**开栏时 SET `In Menu`（否则 I 会被忽略，关不了栏）
 - **开局锁背包 / 引导按 I**：以后再做。现在 I 仍随时能开。做引导时只加开关，不要拆 `IA_Inventory` 的 Started
+- **手电在左边圆格**：已记。不占 8 个方格；菜单壳不要改 `AddItem` / 选格 0–7
 
 `DoYes` **只允许**加一颗 Branch：看 `AddItem` 的返回。其它关板逻辑不要拆。
 
@@ -63,9 +65,10 @@
 
 | 资源 | 职责 |
 |------|------|
-| `BP_Cha_01` | `InventoryItems` + `Inventory Images`（各 8 格）；`AddItem` / `HasItem` / `RemoveItem`；`TryInventoryNav`（走路口，勿接 In Menu） |
-| `WBP_InventoryHUD` | 底栏；`Slot Texts` / `Slot Images` / `Slot Frames`；`RefreshInventory` 刷字+图；`Selected Slot` + `HandleInventoryNav` 选格 |
-| `WBP_PickupConfirm` | `DoYes`：`In Image` ← Source Pickup 的 `Display Image`；满包则 `DoNo` + `SayBagFull` |
+| `BP_Cha_01` | `InventoryItems` + `Inventory Images` + `Inventory Descs`（各 8 格）；`AddItem` / `HasItem` / `RemoveItem`；`TryInventoryNav`（走路口，勿接 In Menu） |
+| `WBP_InventoryHUD` | 底栏；`Slot Texts` / `Slot Images` / `Slot Frames`；`RefreshInventory` 刷字+图；`Selected Slot` + `HandleInventoryNav` 选格；调查窗引用 `Inv Examine UI` |
+| `WBP_PickupConfirm` | `DoYes`：`In Image` ← `Display Image`；`In Title` ← `Examine Title`；`In Desc` ← `Examine Body`。`SetupPrompt` 的 `In Desc` 仍是 `Item Description`。满包则 `DoNo` + `SayBagFull`。栏内调查**不要**开这张板 |
+| `WBP_ExaminePanel` | 场景检视已测通；栏内调查同一套：左 `Img_Item`、右标题+正文、`J 返回`。**不要**调 `ShowPanel`（会 SET In Menu） |
 
 路径：`Content/Assests/Charactors/C_01/BP/BP_Cha_01`  
 HUD：`Content/Data/UMG/HUD/WBP_InventoryHUD`
@@ -385,8 +388,9 @@ Compile。
   → RefreshSlotCursor
 ```
 
-搜 **Clamp (Integer)**。`Selected Slot + Delta` 用 **Add**（整数）。  
-到头停住：格 0 再 A 仍是 0；格 7 再 D 仍是 7。不要取余循环。
+搜 **Clamp (Integer)**。`Selected Slot + Delta` 用 **Add**（整数）。
+
+**2026-09-15 改为循环：** 不要再用 Clamp 停住。`MoveSlotCursor` 里 `Selected Slot + Delta` 之后：`> 7` 写成 **0**，`< 0` 写成 **7**。第 8 格 D → 第 1 格；第 1 格 A → 第 8 格。不要改 `MoveSlotMenuCursor`。
 
 Compile。
 
@@ -578,10 +582,12 @@ True 空着（以后接栏内菜单）；False / 无效仍进原来的 Dialogue 
 
 ---
 
-## 第三块：栏内菜单壳（2026-09-10，先建函数再接线）
+## 第三块：栏内菜单壳（2026-09-10，**已测通**）
 
 选中**有物**的格按 J → 弹出四项。空格 J 什么都不做。  
-**本块只做壳**：能开、能关、A/D 换项、J 确认进空函数。调查出图 / 使用效果 / Combine / 丢弃 **下一块**。
+壳已通：能开、能关、A/D 换项、开着不换格。调查出图 / 使用 / Combine / 丢弃 **下一块**。
+
+**踩坑：** `HandleSlotMenuNav` 的 `<` / `>` 上面必须接 **`Forward`**，不要写死 0.0。松手那条 SET `Slot Menu Latched` **不勾**。Show 末尾 Latched **不勾**。Completed 上 SET Menu Latched false（Target = HUD）。
 
 接在已有的 J True 口（Inventory Visible）上。**不要** SET `In Menu`（否则 I 关不了栏）。不要改拾取 In Menu 口。
 
@@ -597,7 +603,7 @@ True 空着（以后接栏内菜单）；False / 无效仍进原来的 Dialogue 
 | 操作 | 预期 |
 |------|------|
 | 空格按 J | 无菜单 |
-| 有钥匙的格按 J | 底栏上方出现：调查 / 使用 / Combine / 丢弃；默认高亮 **调查** |
+| 有钥匙的格按 J | 底栏上方出现：Examine / Use / Combine / Discard；默认高亮 **Examine** |
 | 菜单开着按 A / D | 高亮上下移；格子光标**不动** |
 | 菜单开着按 J | 关菜单（对应项只进空函数，不崩） |
 | 菜单开着按 I | 栏和菜单一起没；A/D 又能走 |
@@ -609,10 +615,10 @@ True 空着（以后接栏内菜单）；False / 无效仍进原来的 Dialogue 
 
 ```
 VB_SlotMenu          Vertical Box；默认 Collapsed
-  Txt_Menu_0         「调查」
-  Txt_Menu_1         「使用」
+  Txt_Menu_0         「Examine」
+  Txt_Menu_1         「Use」
   Txt_Menu_2         「Combine」
-  Txt_Menu_3         「丢弃」
+  Txt_Menu_3         「Discard」
 ```
 
 四个 Text 都勾 **Is Variable**。锚在底栏上方（先屏幕底部居中即可，不必精确钉在选中格上）。  
@@ -623,7 +629,7 @@ VB_SlotMenu          Vertical Box；默认 Collapsed
 | 名 | 类型 | 默认 | 说明 |
 |----|------|------|------|
 | `Slot Menu Visible` | Boolean | false | 菜单是否开着 |
-| `Slot Menu Index` | Integer | 0 | 0 调查 / 1 使用 / 2 Combine / 3 丢弃 |
+| `Slot Menu Index` | Integer | 0 | 0 Examine / 1 Use / 2 Combine / 3 Discard |
 | `Slot Menu Latched` | Boolean | false | 按住 A/D 只移一项 |
 | `Slot Menu Texts` | Text 对象引用 **数组** | 空 | Construct 装 4 个菜单字 |
 
@@ -660,10 +666,11 @@ For Loop 0–3
 ```
 SET Slot Menu Index = 0
   → SET Slot Menu Visible = true
-  → SET Slot Menu Latched = true
+  → SET Slot Menu Latched = false
   → Set Visibility（VB_SlotMenu = Visible）
   → RefreshSlotMenuCursor
 ```
+开菜单 Latched **不勾**（和 Show 底栏一样）。勾上会吃掉第一下 A/D。
 
 **4. `HideSlotMenu`**
 
@@ -743,9 +750,648 @@ True → HandleInventoryJ（Target = Inventory HUD）
 
 **`IA_movement` Completed** 里现有的 SET Slot Nav Latched false 旁边，同样 SET **Slot Menu Latched** false（Target 都是 HUD）。否则菜单 A/D 会锁死，和选格同一原因。
 
-### 调查（第四块，本块不要接）
+### 调查（第四块）
 
-`InvActionExamine` 以后：复用拾取板图/描述，**不要 Yes/No**。  
-现在背包只有 `InventoryItems` + `Inventory Images`，**没有描述数组**。调查那一块再给角色加 `Inventory Descs`（Text×8），`AddItem` 多一针 `In Desc`。本块不要改 `AddItem`。
+`InvActionExamine`：走 **`WBP_ExaminePanel`**（左图右文、J 返回）。**不要 Yes/No**。图用 `Display Image`；标题/正文用 `Examine Title` / `Examine Body`。拾取短描述仍是 `Item Description`。步骤见文末「第四块」。
 
-规格全文也在 `docs/TODO.md`「后续：背包栏」。
+### 能用 / 不能用（已记，菜单壳先仍显示四项）
+
+不要在菜单里写死 `Item_A`。钥匙开门仍走场景 J + `HasItem`，**不等于**栏内「使用」。
+
+| 类型 | 菜单 | 默认（钥匙实例） | 例子 |
+|------|------|------------------|------|
+| **特殊物** | 只有 **调查 / 合成**。没有使用、没有丢弃 | `b Can Use` **不勾**；`b Can Discard` **不勾** | 钥匙、关卡关键物 |
+| **一般物** | **调查 / 使用 / 合成 / 丢弃** 都有 | 两颗都勾上 | 药剂、电池 |
+
+`AddItem` 把两颗 Bool 写入角色 `Inventory Can Use` / `Inventory Can Discard`（各 Bool×8），和 `Inventory Images` 同一格。  
+第五块起按开关 **藏掉** 没有的项（不要只偏暗占着 A/D）。丢弃清的是**当前格**，不要走 `RemoveItem`（按 ID 会清错格）。不扔回场景。新道具只改实例 Details。
+
+手电在左边圆格：可使用、不能丢，不进这 8 格。
+
+### 手电 = 左边圆格（已记，菜单壳不要接）
+
+你圈的那格：底栏**最左圆标**。右边 8 个白方格仍是拾取栏，**不是**手电。
+
+| 项 | 定什么 |
+|----|--------|
+| 位置 | 圆格单独一块 UI，不进 `InventoryItems[0]` |
+| 获得 | **场景捡**进圆格，不走 `AddItem`。不要 Duplicate 钥匙（Cast 会失败）；用 **Child** |
+| 8 方格 | `AddItem` 仍从方格 0 填到 7。钥匙仍进**第一个方格** |
+| 一直在 | 圆格不能丢、不能被捡来的东西盖掉 |
+| `L` | 开局不能用。捡进圆格、`b Has Flashlight` 为 true 之后才走现有 `IA_Flashlight`。**不要拆** In Menu 判断 |
+| 光标 | 以后 A/D 最左停在圆格，再 D 才到第一个方格。**现在**选格仍是方格 0–7 |
+
+**2026-09-16 晚上停在这里：**
+
+已接：
+
+- 圆格 `SizeBox_SP` 已拖到 **Canvas** 与底栏 `Border` 平级（不在 8 格 HB 里）。圆：`Border_7` Rounded Box，半径为边长一半
+- 捡手电进圆格、钥匙进方格仍通
+- 菜单外框 **`Border_SlotMenu`**（Is Variable）：Canvas 直属，里面 `VB_SlotMenu` 四行字。Show/Hide 打 **Border** Visible/Collapsed；`VB_SlotMenu` 保持 Visible。`PlaceSlotMenuOverSelected` 的 Slot as Canvas Slot / Set Position 打 **Border_SlotMenu**（打 VB 会 Accessed None）
+- 临时黑底：Border Brush Draw As Rounded Box，Tint 黑，不要贴图。X 微调：Make Vector 的 Add 第三口 ±10；Alignment 已是 0.5 / 1.0 不要改
+- **菜单里头像：先不加**（可独立于格子，以后再说）
+
+未做：
+
+| 项 | 说明 |
+|----|------|
+| 开局锁 `L` | `IA_Flashlight` 最前 `b Has Flashlight`，False Return。In Menu 不要拆 |
+| 菜单字有时被藏 | Hide 不要 Collapsed `VB_SlotMenu`；Show 可再 Visible 一次 VB |
+| 使用 / Combine | 仍空 |
+
+不要 SET In Menu。不要改 `AddItem`。A/D 选中圆格以后再说。
+
+---
+
+## 第三块步骤（接线）
+
+一次一块。**不要** SET `In Menu`，不要改拾取 In Menu 口，不要改 `AddItem`。
+
+### 不要改
+
+- `Img_Dim`、底栏 Border、格子 Horizontal Box、`Slot Texts` / `Slot Images` / `Slot Frames` 现有 Construct
+- `ShowInventoryHUD` 的 Set Visibility / SET Inventory Visible / Latched 不勾
+- `IA_movement` Triggered 的 In Menu 口；Completed 上现有 SET Slot Nav Latched **不要拆**（后面只在旁边加一颗）
+- 密码锁、拾取板
+
+### 步骤 1 — Designer：加 `VB_SlotMenu`
+
+打开 `WBP_InventoryHUD` → **Designer**。
+
+Hierarchy 现在应是：`Canvas Panel` → `Img_Dim` → 底栏 `Border`（里面才是格子）。
+
+Palette 拖 **Vertical Box** 到 Hierarchy 的 **`Canvas Panel` 名字上**（不要进 `Img_Dim`，不要进底栏 Border，不要进格子 Horizontal Box）。  
+改名为 **`VB_SlotMenu`**。
+
+Canvas Slot：
+
+| 项 | 值 |
+|----|-----|
+| Anchors | 底中（九宫格最下一排中间；Min 0.5,1 / Max 0.5,1） |
+| Alignment | X **0.5**，Y **1.0**（往上长） |
+| Position X | **0** |
+| Position Y | **-140**（先悬在底栏上方；被挡住再改） |
+| Size X / Y | **200** / **160** |
+| ZOrder | **2**（要比 `Img_Dim` 和底栏高） |
+
+Details → Behavior → **Visibility = Collapsed**。
+
+再 Pallete 拖 **Text** 到 Hierarchy 的 **`VB_SlotMenu` 名字上**，做四个。每个都勾 **Is Variable**。
+
+| 名 | Text |
+|----|------|
+| `Txt_Menu_0` | Examine |
+| `Txt_Menu_1` | Use |
+| `Txt_Menu_2` | Combine |
+| `Txt_Menu_3` | Discard |
+
+字色白（Color 1,1,1,1）；字号约 **24**；Justification 居中。Vertical Box Slot Padding Bottom 约 **4**。
+
+### 菜单对齐当前格（壳通了再做）
+
+第三块先钉在屏幕底中。要对齐选中方格：改锚点 + `ShowSlotMenu` 末尾调一次位置。手电圆格以后再说。
+
+**Designer：** 点 `VB_SlotMenu`。Anchors 改成 **左上角一个点**（Min 0,0 / Max 0,0）。Alignment 仍是 X **0.5**、Y **1.0**（以菜单底边中点为轴，往上长）。ZOrder 2 不要改。
+
+根 `Canvas Panel` 勾 **Is Variable**（若还没有）。
+
+**函数 `PlaceSlotMenuOverSelected`**（HUD，无输入）：
+
+```
+Get Slot Frames[Selected Slot]
+  → Is Valid
+       False → Return
+       True  → Get Cached Geometry（格子）
+            → Absolute Pos = Get Absolute Position
+            → Size = Get Local Size
+            → 中心上方 = Absolute Pos + (Size.X * 0.5, 0)
+            → CanvasGeom = Get Cached Geometry（Canvas Panel）
+            → Local = Absolute To Local（Geometry = CanvasGeom，Absolute = 中心上方）
+            → Slot as Canvas Slot（VB_SlotMenu）→ Set Position
+                 X = Local.X
+                 Y = Local.Y - 8
+```
+
+`ShowSlotMenu` 在 Set Visibility **Visible 之后**、Refresh **之前**（或之后）调 `PlaceSlotMenuOverSelected`。格子几何一直有效，不必 Delay。
+
+Compile。测：选格 0 出菜单应在钥匙上方；D 换到空格再 J，菜单应跟着那一格。开着菜单 A/D 只换项，菜单位置不用跟着动。
+
+Compile。Designer 里能看到四行字属正常（Collapsed 在编辑器里仍会画）。**不要** Play 测菜单，现在还没有 Graph。
+
+### 步骤 2 — HUD 变量
+
+`WBP_InventoryHUD` → Variables **+**：
+
+| 名 | 类型 | 默认 |
+|----|------|------|
+| `Slot Menu Visible` | Boolean | **false** |
+| `Slot Menu Index` | Integer | **0** |
+| `Slot Menu Latched` | Boolean | **false** |
+| `Slot Menu Texts` | **Text** 对象引用的 **数组** | 空 |
+
+`Slot Menu Visible` 勾 **Instance Editable**（或 Blueprint Read），角色以后要 Get。  
+`Selected Slot` / `Slot Nav Latched` / `Inventory Visible` **不要改类型、不要清空**。
+
+Compile → Save HUD。
+
+### 步骤 3 — Construct 装满 `Slot Menu Texts`
+
+打开 **Event Construct**。现有给 `Slot Texts` / `Slot Images` / `Slot Frames` Add 的那串 **一根都不要拆、不要插到中间**。
+
+接到**最后一根白线后面**（Slot Frames 那个 For Loop 的 Completed 之后；没有 Completed 就接在最后一颗 Add 后面）：
+
+```
+Clear（数组 = Slot Menu Texts）
+  → Add（数组 = Slot Menu Texts，Item = Txt_Menu_0）
+  → Add（Item = Txt_Menu_1）
+  → Add（Item = Txt_Menu_2）
+  → Add（Item = Txt_Menu_3）
+```
+
+顺序必须是 0、1、2、3。Add 的数组必须是变量 **`Slot Menu Texts`**，Item 从变量面板拖对应 Text，不要用 Slot Texts 里的格子。
+
+Compile。
+
+### 步骤 4 — 四个空函数
+
+`WBP_InventoryHUD` 新建，无输入、无输出，图里只有 **Return**：
+
+- `InvActionExamine`
+- `InvActionUse`
+- `InvActionCombine`
+- `InvActionDiscard`
+
+不要 Destroy、不要 RemoveItem、不要 Print。Compile。
+
+### 步骤 5 — `IsSelectedSlotEmpty`
+
+新建函数。Outputs **+**：`b Empty`（Boolean）。
+
+```
+Get Owning Player Pawn
+  → Cast To BP_Cha_01
+       失败 → Return（b Empty = true）
+       成功 → Get（数组 = InventoryItems，Index = Selected Slot）
+            → Return（这一格 == None）
+```
+
+`InventoryItems` 从 **Cast 成功的角色**拖出，不要用 HUD self。`Selected Slot` 是 HUD 自己的整数。  
+Name 空 = **None**（Equal (Name)）。
+
+Compile。
+
+### 步骤 6 — `RefreshSlotMenuCursor`
+
+新建函数，无输入。
+
+```
+For Loop（First = 0，Last = 3）
+  → Get（Slot Menu Texts，Index = Loop Index）
+  → Is Valid
+       False → 空着
+       True  → Branch（Loop Index == Slot Menu Index）
+                 True  → Set Render Opacity（1.0）
+                 False → Set Render Opacity（0.45）
+```
+
+`Set Render Opacity` 的 Target 是 **Get 出来的那颗 Text**。不要 Print。
+
+Compile。
+
+### 步骤 7 — `ShowSlotMenu` / `HideSlotMenu`
+
+**`ShowSlotMenu`：**
+
+```
+SET Slot Menu Index = 0
+  → SET Slot Menu Visible = true（勾上）
+  → SET Slot Menu Latched = false（不勾；勾上会吃掉第一下 A/D）
+  → Set Visibility（Target = VB_SlotMenu，Visible）
+  → RefreshSlotMenuCursor
+```
+
+**`HideSlotMenu`：**
+
+```
+SET Slot Menu Visible = false（不勾）
+  → SET Slot Menu Latched = false（不勾）
+  → Set Visibility（Target = VB_SlotMenu，Collapsed）
+```
+
+Set Visibility 的 Target 必须是 **`VB_SlotMenu`**，不要 self（self 会把整条底栏藏掉）。
+
+Compile → Save HUD。
+
+还不要接角色 J、不要 Play 测菜单。下一步才是 `MoveSlotMenuCursor` / `HandleSlotMenuNav` / `ConfirmSlotMenu` / `HandleInventoryJ`。
+
+---
+
+## 第四块：调查出图（2026-09-11，**已测通**）
+
+选中有物的格 → J 出菜单 → 停在 Examine 再 J → **和墙上纸条同一套检视板**：左图、右描述、`1/1`、**J 返回**。没有 Yes/No。再 J 关窗，底栏还在。
+
+使用 / Combine / 丢弃仍空。不要新建 Widget。不要开 `WBP_PickupConfirm` 做调查（那是捡东西的）。
+
+若已经按上一版在拾取板上建了 `SetupExamineView`：**删掉或不要调**，改走 `WBP_ExaminePanel`。
+
+### 不要改
+
+- `WBP_ExaminePanel` 的 **`ShowPanel` / `CloseExamine` / `SetupExamine` 内部**、Hierarchy、`HandleExamine`
+- `IA_movement` 的 **In Menu** 口（SelectYes / SelectNo）
+- `SelectYes` 的 SET **勾**；`SetupPrompt` 内部
+- `DoYes` 的 Branch / Destroy / 满包对话（只给 `AddItem` 补一针 `In Desc`）
+- 密码锁 `ShowPanel` / Hierarchy
+- `PlaceSlotMenuOverSelected`（已测通）
+- 不要 SET `In Menu`；不要 Ignore Move
+- 不要 SET 角色 **`Examine UI`**（否则会走场景 `CloseExamine`，Icon / Idle 会乱）
+- 不要 SET 角色 **`Pickup Confirm UI`**
+- `InvActionUse` / `Combine` / `Discard` 仍只 Return
+
+### 操作（本块测完应是）
+
+| 操作 | 预期 |
+|------|------|
+| 714 → 捡钥匙 → I → 格 0 J → Examine 再 J | **左**钥匙图，**右**描述（捡时那句）；无 Yes/No；底下有 J 返回 |
+| 调查开着再 J | 窗关掉，底栏还在，菜单不要自动再开 |
+| 调查开着 A / D | 格子**不动** |
+| 调查开着 I | 栏和窗一起没；A/D 又能走 |
+| 关栏后靠近钥匙 J | 仍是拾取 Yes/No，默认 No |
+| 靠近墙上纸条 J | 场景检视仍和以前一样 |
+
+### 步骤 1 — 角色：`Inventory Descs` + Resize
+
+打开 `BP_Cha_01` → Variables **+**：
+
+| 名 | 类型 | 默认 |
+|----|------|------|
+| `Inventory Descs` | **Text** 的 **数组** | 空 |
+
+不要改 `InventoryItems` / `Inventory Images` 类型。
+
+Event BeginPlay：找到已有的 **Resize** `InventoryItems`（Size=8）。旁边再一颗 Resize：
+
+```
+Resize Array（Target Array = Inventory Descs，Size = 8）
+```
+
+`Inventory Images` 若已经有 Resize 8，不要拆；Descs 跟它并列即可。
+
+Compile。
+
+### 步骤 2 — `AddItem` 加 `In Desc`
+
+打开 **`AddItem`**。现有 **`ItemID`**、写图那针（常见名 **`In Image`**）不要改名、不要删。
+
+函数 **Inputs +**：`In Desc`（Text）。必须是 **Inputs**，不要加成 Outputs。
+
+找到写入 `InventoryItems` / `Inventory Images` 的那两颗 **Set Array Elem**（同一个 Loop Index，True 路、Return 之前）。旁边再一颗：
+
+```
+Set Array Elem
+  Array = Inventory Descs
+  Index = 同一颗 Loop Index
+  Item = 入口针 In Desc
+```
+
+白线必须经过这颗。满包那条 False / Completed **不要**写 Descs。
+
+Compile。`DoYes` 上 `AddItem` 会多一颗没接的 `In Desc`，下一步接。
+
+### 步骤 3 — `RemoveItem` 清描述
+
+打开 **`RemoveItem`**。找到清 `InventoryItems` 那颗 Set Array Elem（Item = None）。同一 Index 再清：
+
+```
+Set Array Elem（Inventory Descs，同一 Index，Item = 空 Text）
+```
+
+`Inventory Images` 若已经在这里清成 None，不要拆。不要用 Remove 缩短数组。
+
+Compile。
+
+### 步骤 4 — `DoYes` 只补一针
+
+打开 `WBP_PickupConfirm` → **`DoYes`**。
+
+现有 `AddItem`：**不要**改 Branch / Destroy。把新针接上：
+
+```
+In Desc ← Source Pickup 的 Item Description
+```
+
+`In Image` 仍接 `Display Image`。ItemID 不要改。
+
+Compile → Save 拾取板 + 角色。钥匙实例 Details 里 `Item Description` / `Display Image` 本来就有，不用改文案。
+
+### 步骤 5 — 检视板：只加 `ShowExamineView`
+
+打开 `WBP_ExaminePanel`（`Content/Data/UMG/Examine/`）。
+
+**不要动** `ShowPanel`、`CloseExamine`、`SetupExamine` 里已有的节点（场景纸条靠它们）。
+
+新建函数 **`ShowExamineView`**（无输入）：
+
+```
+Set Visibility（Target = Canvas Panel，Visible）
+```
+
+只这一颗。不要 Ignore Move，不要 SET In Menu，不要 HideInteractIcons，不要鼠标 / UI Only。
+
+`Canvas Panel` 须勾 **Is Variable**（`ShowPanel` 已经能设它，一般已勾）。
+
+Compile → Save 检视板。
+
+### 步骤 6 — HUD：`Inv Examine UI` + 开关
+
+打开 `WBP_InventoryHUD` → Variables **+**：
+
+| 名 | 类型 | 默认 |
+|----|------|------|
+| `Inv Examine UI` | **`WBP_ExaminePanel`** 对象引用 | None |
+
+不要改 `Slot Menu Visible` / `Selected Slot`。若误加成了 `WBP_PickupConfirm`，改类型后 Compile。
+
+**函数 `HideInvExamine`**（无输入）：
+
+```
+Is Valid（Inv Examine UI）
+  False → Return
+  True  → Remove from Parent（Target = Inv Examine UI）
+        → SET Inv Examine UI = None
+```
+
+不要调 `CloseExamine`（那会 SET 角色 `Examine UI` / Idle）。不要 SET `Pickup Confirm UI`。
+
+打开已有空函数 **`InvActionExamine`**，删掉光 Return，改成：
+
+```
+HideInvExamine
+  → Get Owning Player Pawn → Cast BP_Cha_01
+       失败 → Return
+       成功 → Create Widget（Class = WBP_ExaminePanel，Owning Player = Get Player Controller Index 0）
+            → SET Inv Examine UI = Create Return
+            → SetupExamine
+                 Target = Create Return
+                 In Title = 空
+                 In Body  = Get Inventory Descs[Selected Slot]（数组从 Cast 角色拖）
+                 In Image = Get Inventory Images[Selected Slot]
+            → Add to Viewport（Target = Create Return，ZOrder = 10）
+            → ShowExamineView（Target = Create Return）
+```
+
+要点：
+
+- `In Title` / `In Body` / `In Image` 是 **`SetupExamine` 的入口针**，不要用 Widget 变量
+- 第一版标题空，右侧正文走描述。模型以后再接 `Display Mesh`
+- Get 数组的 Target 是 **Cast 成功的角色**，Index 是 HUD 的 `Selected Slot`
+- **不要**调 `ShowPanel`（会 SET In Menu + Ignore Move，I 关不了栏、A/D 会进拾取口）
+- **不要** SET 角色 `Examine UI` / `Pickup Confirm UI`
+
+`ConfirmSlotMenu` 不用改：0 口已经接 `InvActionExamine`，然后四路仍进 `HideSlotMenu`。
+
+Compile → Save HUD。
+
+### 步骤 7 — J / I / A/D 三口
+
+**`HandleInventoryJ`** 最前面加一口（现有 Slot Menu Visible 那颗 Branch **不要拆**，整坨接到新 Branch 的 False）：
+
+```
+Is Valid（Inv Examine UI）
+  True  → HideInvExamine
+  False → 原来的 Branch（Slot Menu Visible）→ Confirm / 空格 / ShowSlotMenu
+```
+
+调查开着时 J 只关窗，不要再 `ShowSlotMenu`。
+
+**`HideInventoryHUD`** 末尾：现有 `HideSlotMenu` 旁边再调 **`HideInvExamine`**。Set Visibility / SET Inventory Visible **不要拆**。开着调查按 I 才不会留下板。
+
+**`TryInventoryNav`**：现有 `Slot Menu Visible` 的 True 口（`HandleSlotMenuNav`）不要拆。在这颗 Branch 的 **False** 上、`HandleInventoryNav` **之前**插入：
+
+```
+Is Valid（Inv Examine UI）
+  True  → Return（b Handled = true）     // 调查开着 A/D 不换格
+  False → 原来的 HandleInventoryNav
+```
+
+不要 SET In Menu。不要改 `IA_movement` 的 In Menu 口。
+
+Compile 角色 + HUD + 检视板 + 拾取板 → Save。
+
+### 这一块怎么测
+
+Stop PIE → Compile 角色 + HUD + `WBP_ExaminePanel` + 拾取板 → Play。钥匙实例须有 `Display Image` 和 `Item Description`。
+
+| 操作 | 预期 |
+|------|------|
+| 714 → 捡 Yes → I → 格 0 J → Examine J | 左大图、右描述；无 Yes/No；有 J 返回；人仍不能走 |
+| 再 J | 窗关；底栏在；菜单不要自动弹出 |
+| 再 J | 菜单再出（和以前一样） |
+| 调查开着 D | 钥匙格仍是选中，不换格 |
+| 调查开着 I | 全关；能走 |
+| 关栏后捡的流程 | Yes/No 仍在，默认 No |
+| 靠近纸条 J | 场景检视版式不变 |
+| 出门耗钥 | 格清空；空格 J 仍无菜单 |
+
+### 踩坑
+
+| 现象 | 原因 |
+|------|------|
+| 调查变成拾取 Yes/No | Create 成了 `WBP_PickupConfirm`，或 SET 了 `Pickup Confirm UI` |
+| 看不见板但仍锁着 / 出了板人不能走且 I 无效 | 调了 **`ShowPanel`**。须调 `ShowExamineView` |
+| 关调查后场景 Icon / 状态乱 | SET 了角色 `Examine UI` 或调了 `CloseExamine`。只 Remove HUD 那份引用 |
+| 开栏 A/D 变成 Yes/No | SET 了 `In Menu`。本块不要 SET |
+| 调查无字 | `AddItem` 的 `In Desc` 没接；或 `SetupExamine` 接了 Widget 变量不是入口针；或钥匙实例描述空 |
+| 调查无图、格子有图 | `In Image` 没接角色 `Inventory Images[Selected Slot]` |
+| 再 J 立刻又出菜单 | `HandleInventoryJ` 没把 Is Valid 调查窗放在最前 |
+| 按 I 留下检视板 | `HideInventoryHUD` 没调 `HideInvExamine` |
+| 场景纸条坏了 | 改了 `ShowPanel` / `CloseExamine` / Hierarchy。本块只允许新建 `ShowExamineView` |
+
+---
+
+## 第五块：丢弃（2026-09-12）
+
+一般物菜单有 **丢弃**；J 清空**当前格**（字/图/描述/标题/开关），后面的格不前挤。不 Spawn、不扔回场景。  
+特殊物（本关钥匙）没有丢弃项、也丢不掉。使用仍空（只藏项）。合成仍空（J 只关菜单）。
+
+不要写死 `Item_A`。不要走 `RemoveItem`（那是按 ID，两把同 ID 会清错格）。出门耗钥仍用原来的 `RemoveItem`。
+
+### 不要改
+
+- `IA_movement` 的 In Menu 口；`SelectYes` 的勾
+- 密码锁；`ShowPanel` / `CloseExamine`
+- `InvActionExamine` 开窗那串
+- `DoYes` 的 Branch / Destroy
+- 不要 SET `In Menu`
+
+### 操作（本块测完应是）
+
+| 操作 | 预期 |
+|------|------|
+| 钥匙默认（两颗 Bool 不勾）J 出菜单 | 只有 **Examine / Combine**。没有 Use、没有 Discard |
+| 临时勾上钥匙 `b Can Discard`，再捡 → 菜单 | 有 Discard；J 后该格变空，其它格不动 |
+| 不勾 `b Can Discard` 再捡 → 菜单点不到丢弃 | 格子还在 |
+| 有钥匙出门 | 仍耗钥，和以前一样 |
+| 调查 / 捡东西 Yes/No | 不受影响 |
+
+本关没有药剂。测丢弃：钥匙实例 **临时勾** `b Can Discard`，测完再去掉。
+
+### 步骤 1 — 钥匙两颗开关
+
+打开 `BP_Item_Key` → Variables **+**（若已有就核对默认）：
+
+| 名 | 类型 | 默认 | 勾上 |
+|----|------|------|------|
+| `b Can Use` | Boolean | **false**（不勾） | Instance Editable |
+| `b Can Discard` | Boolean | **false**（不勾） | Instance Editable |
+
+Compile → Save。关卡里钥匙实例确认两颗都**不勾**。
+
+### 步骤 2 — 角色两数组 + Resize
+
+`BP_Cha_01` Variables **+**：
+
+| 名 | 类型 |
+|----|------|
+| `Inventory Can Use` | Boolean **数组** |
+| `Inventory Can Discard` | Boolean **数组** |
+
+BeginPlay 现有 Resize 8 旁边再两颗：Size 都是 **8**。
+
+Compile。
+
+### 步骤 3 — `AddItem` 两针
+
+Inputs **+**：`In Can Use`（Boolean）、`In Can Discard`（Boolean）。必须是 Inputs。
+
+写入 `InventoryItems` 的同一 Loop Index、True 路 Return 之前，再两颗 Set Array Elem：
+
+- `Inventory Can Use` = 入口针 `In Can Use`
+- `Inventory Can Discard` = 入口针 `In Can Discard`
+
+满包那条不要写。Compile。
+
+### 步骤 4 — `RemoveItem` 清开关
+
+清格子的同一 Index 再两颗：两颗 Bool 都写成 **false**（不勾）。不要 Remove 缩短。
+
+**2026-09-15 已测通（丢弃整条 + 菜单跳过藏项）：**
+
+- 勾实例 `b Can Discard` → `DoYes` 接钥匙 `In Can Discard` → 菜单有 Discard → `ClearSlot` 清格、清图
+- `ClearSlot` 末尾 Is Valid / RefreshInventory 的 Target = 角色 **`Inventory HUD`**（不要 self）
+- 空图：Slot Image **Collapsed**，不要对空 Texture 走 Set Brush from Texture
+- 有图：Set Brush 后 **Slot Text Collapsed**（藏 `Item_A`）
+- `MoveSlotMenuCursor` 跳过藏项：一下 D 从 Examine 到 Combine；关菜单 A/D 换格仍走 `MoveSlotCursor`（0～7）
+- 角色 `Inventory Can Use` / `Can Discard` 已是 Boolean 数组，不要改成 Text
+
+测完把钥匙实例 **`b Can Discard` 去掉**（本关钥匙不能丢）。使用 / Combine 仍空。出门耗钥仍走 `RemoveItem`。不要 SET In Menu。
+
+### 步骤 5 — 角色：`ClearSlot`（下次第一件）
+
+新建函数 **`ClearSlot`**。Inputs **+**：`Slot Index`（Integer）。
+
+不要用 `RemoveItem`。按格子号清：
+
+```
+Branch（Slot Index < 0 或 > 7）
+  True  → Return
+  False → Set Array Elem InventoryItems[Slot Index] = None
+        → Inventory Images = None
+        → Inventory Descs = 空 Text
+        → Inventory Titles = 空 Text
+        → Inventory Can Use = false
+        → Inventory Can Discard = false
+        → RefreshInventory（Target = Inventory HUD，先 Is Valid）
+```
+
+Compile。
+
+### 步骤 6 — `DoYes` 只补两针
+
+`WBP_PickupConfirm` → `DoYes` → 现有 `AddItem`：
+
+- `In Can Use` ← Source Pickup 的 `b Can Use`
+- `In Can Discard` ← Source Pickup 的 `b Can Discard`
+
+其它针不要拆。Compile。
+
+### 步骤 7 — HUD：菜单藏项
+
+`WBP_InventoryHUD` 新建 **`IsMenuRowAvailable`**。Inputs：`Row`（Integer）。Outputs：`b Available`（Boolean）。
+
+```
+Branch（Row == 0）→ Return true          // Examine 总有
+Branch（Row == 2）→ Return true          // Combine 总有
+Branch（Row == 1）→ Cast 角色 → Return Inventory Can Use[Selected Slot]
+Branch（Row == 3）→ Cast 角色 → Return Inventory Can Discard[Selected Slot]
+其它 → Return false
+```
+
+Cast 失败当 false。
+
+新建 **`RefreshSlotMenuOptions`**：
+
+```
+For Loop 0–3
+  Get Slot Menu Texts[i]
+  Is Valid
+    True → Branch（IsMenuRowAvailable(i)）
+             True  → Set Visibility Visible
+             False → Set Visibility Collapsed
+```
+
+打开 **`ShowSlotMenu`**：Set Visibility `VB_SlotMenu` Visible **之后**、`PlaceSlotMenuOverSelected` / Refresh 之前（或之后）调 `RefreshSlotMenuOptions`。现有 SET Index=0、Latched 不勾 **不要拆**。
+
+打开 **`MoveSlotMenuCursor`**：Clamp 之后不要直接 SET。改成：
+
+```
+Old = Slot Menu Index
+Cand = Clamp(Old + Delta, 0, 3)
+→ 最多试 4 次：
+     IsMenuRowAvailable(Cand) 为 true → SET Index = Cand → RefreshSlotMenuCursor → Return
+     否则 Next = Clamp(Cand + Delta, 0, 3)
+     若 Next == Cand（到头）→ SET Index = Old → Refresh → Return
+     否则 Cand = Next，继续
+```
+
+到头停在**上一档可见项**，不要停在藏着的 Use/Discard 上。
+
+Compile HUD。
+
+### 步骤 8 — `InvActionDiscard`
+
+打开已有空函数，不要只 Return：
+
+```
+Get Owning Player Pawn → Cast BP_Cha_01
+  失败 → Return
+  成功 → Branch（Inventory Can Discard[Selected Slot]）
+           False → Return
+           True  → ClearSlot（Slot Index = Selected Slot）
+```
+
+`ConfirmSlotMenu` 不用改（3 口已经接它，然后 HideSlotMenu）。  
+`InvActionUse` / `InvActionCombine` 仍只 Return。
+
+Compile → Save。
+
+### 这一块怎么测
+
+Stop PIE → Compile 钥匙 + 角色 + HUD + 拾取板 → Play。
+
+| 操作 | 预期 |
+|------|------|
+| 714 → 捡钥匙（默认不勾）→ I → J | 菜单只有 Investigate / Combine 两行 |
+| A/D | 只在这两行之间，不会停在看不见的项上 |
+| 停 PIE，钥匙勾上 `b Can Discard`，再 Play 捡 | 菜单多出 Discard；J 后格变空 |
+| 勾上再去掉，再 Play 捡 | 又没有 Discard；格子丢不掉 |
+| 出门 | 仍耗钥 |
+
+### 踩坑
+
+| 现象 | 原因 |
+|------|------|
+| 钥匙也能丢 | 实例勾了 `b Can Discard`，或 `AddItem` 没写这颗 Bool |
+| 丢了两格 / 清错格 | 走了 `RemoveItem(ItemID)`。必须 `ClearSlot(Selected Slot)` |
+| 菜单仍四项 | `RefreshSlotMenuOptions` 没在 `ShowSlotMenu` 里调 |
+| A/D 停在空白处 | `MoveSlotMenuCursor` 没跳过 Collapsed |
+| 出门坏了 | 改了 `RemoveItem` 的 ID 查找，或误把出门改成 ClearSlot |

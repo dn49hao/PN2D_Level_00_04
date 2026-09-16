@@ -4,7 +4,7 @@
 > 已完成的系统细节不写这里：密码锁见 `docs/CODELOCK.md`，总览见 `docs/PROJECT_CONTEXT.md`。  
 > 工程以 **`D:\PN2D_Level_00_04`** 为准。
 
-最后更新：2026-09-10（选格已测通；栏内菜单函数清单已写，Graph 未接）
+最后更新：2026-09-16（圆格已拆到 Canvas；菜单外框黑底；头像不加）
 
 ---
 
@@ -19,6 +19,7 @@
 | **已测通** | **满包拒捡** | `DoYes` 看 `b Added`；失败不 Destroy；`SayBagFull` 出对话。新物品走同一套拾取板即可 |
 | **已测通** | **格子出图** | `AddItem` 写入 `Inventory Images`；Refresh `Make Slate Brush` 64×64 + `Set Brush`。新物品只改实例 `Display Image` |
 | **已确认** | BeginPlay 临时出板 | 开局不弹锁 |
+| **已测通** | **栏内菜单壳** | 有物 J 出四项；空格无；A/D 换项格子不动；再 J 关菜单。`<`/`>` 须接 Forward。见 `INVENTORY.md` |
 
 ## 下次做
 
@@ -26,7 +27,12 @@
 
 | 优先级 | 项 | 说明 |
 |--------|----|------|
-| **1** | **栏内菜单壳** | 有物 J 出四项；空格无菜单；A/D 换项；J 进空函数。函数名单见 `INVENTORY.md`「第三块」。调查出图是下一块 |
+| **已测通** | **菜单对齐当前格** | `PlaceSlotMenuOverSelected`；选中格上方。不要再改除非偏了 |
+| **已测通** | **调查出图** | `InvActionExamine` 走 `WBP_ExaminePanel`（左图右文、J 返回）。拾取 = `Item Description`；调查 = `Examine Title` / `Examine Body`。栏内缩图已测通（只 `Set Size`，不改 Designer） |
+| **已测通** | **丢弃清格** | `DoYes` 补 `In Can Discard`；`ClearSlot` Refresh Target=`Inventory HUD`。勾实例才能丢；测完去掉。见 `INVENTORY.md` 第五块 |
+| **已测通** | **菜单 A/D 跳过藏项** | `MoveSlotMenuCursor`：看不见的行只改 Cand。一下 D Examine→Combine；选格仍是 `MoveSlotCursor` 0～7 |
+| **进行中** | **手电进圆格** | 捡进圆格 + Canvas 独立圆格已接。下次：开局锁 `L`。菜单头像先不加。见 `INVENTORY.md` 手电节 |
+| **下次** | **使用 / Combine** | 使用仍空；合成仍空。一般物菜单有「使用」项即可 |
 
 关灯出数字仍搁置。解锁直接进背包已记，先不做。
 
@@ -44,6 +50,7 @@
 | **背包 8 格 + 栏内操作** | 8 格 + 选格已测通；菜单见「下次做」 |
 | 开局自言自语 | BeginPlay 或区域自动对话 |
 | **开局锁背包 + 引导按 I** | 开局 I 无效；引导触发后才允许开栏。**第一次开栏**再提示 A/D 换格。只锁开栏，不锁 AddItem。见 `INVENTORY.md`。**先不做** |
+| **手电 = 左边圆格** | 开局就有、可使用、不能丢。不进 `InventoryItems`；8 方格仍捡东西。A/D 以后最左是圆格。**菜单壳先不做** |
 | Toast、环境短提示 `WBP_ScreenPrompt` | 延后 |
 | 检视板正文折行 / 栏宽 | `WBP_ExaminePanel`：`Txt_Body` Fill + Padding 或 Size Box 定宽；中文 Allow Per Character Wrapping。文案在实例 `ExamineBody`。白罩已关、字已改白。**先不做** |
 
@@ -89,12 +96,12 @@
 
 | 操作 | 现在定什么 | 以后 |
 |------|------------|------|
-| **调查** | 开**新窗口**看描述 + 图/模型。**和拾取板同一套展示**（同一份 `Display Image` / `Display Mesh` / 描述；同一块显示区，不要另做一套检视） | 有 Mesh 时和拾取一样接到同一显示区；自动旋转以后再说 |
-| **使用** | 按道具效果（钥匙开门仍可走场景 J） | 栏内使用再接具体效果 |
-| **Combine** | **要做**。菜单项留下；两格道具合成 | 配方表、合成结果进第一个空格 |
-| **丢弃** | **口子先留**：菜单项或空函数可以有，先不接效果 | 也许会做；清空该格、是否扔回场景届时再定 |
+| **调查** | 开 **`WBP_ExaminePanel`**。两类都有 | 有 Mesh 时接到检视左栏 |
+| **使用** | **一般物**才有（药剂、电池）。特殊物（钥匙）**没有这项** | 栏内使用再接效果 |
+| **Combine** | 两类都有 | 配方表、结果进第一个空格 |
+| **丢弃** | **一般物**才有。特殊物**不能丢** | 清格；是否扔回场景届时再定 |
 
-调查不要另起检视 Widget。拾取板上图/模型做成可复用（物品上的展示数据 + 显示控件），栏内调查直接调同一套，只是没有 Take it? / Yes/No。
+栏内调查走现有 `WBP_ExaminePanel`，不要新建第三套检视。数据仍来自拾取物（`Display Image` / 描述）；不要开拾取板、不要 Yes/No。
 
 按 I 显隐、默认隐藏 **已测通**，改多格时不要拆这套。
 
